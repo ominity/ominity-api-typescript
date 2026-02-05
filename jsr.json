@@ -16,7 +16,7 @@
   },
   "publish": {
     "include": [
-      "LICENSE",
+      "LICENSE.md",
       "README.md",
       "RUNTIMES.md",
       "USAGE.md",

@@ -1,11 +1,11 @@
 {
-  "name": "ominity-api-typescript",
+  "name": "@ominity/api-typescript",
   "version": "0.0.1",
   "author": "Ominity",
   "type": "module",
   "tshy": {
     "sourceDialects": [
-      "ominity-api-typescript/source"
+      "@ominity/api-typescript/source"
     ],
     "exports": {
       ".": "./src/index.ts",
@@ -39,7 +39,7 @@
   "exports": {
     ".": {
       "import": {
-        "ominity-api-typescript/source": "./src/index.ts",
+        "@ominity/api-typescript/source": "./src/index.ts",
         "types": "./dist/esm/index.d.ts",
         "default": "./dist/esm/index.js"
       },
@@ -51,7 +51,7 @@
     "./package.json": "./package.json",
     "./types": {
       "import": {
-        "ominity-api-typescript/source": "./src/types/index.ts",
+        "@ominity/api-typescript/source": "./src/types/index.ts",
         "types": "./dist/esm/types/index.d.ts",
         "default": "./dist/esm/types/index.js"
       },
@@ -62,7 +62,7 @@
     },
     "./models/errors": {
       "import": {
-        "ominity-api-typescript/source": "./src/models/errors/index.ts",
+        "@ominity/api-typescript/source": "./src/models/errors/index.ts",
         "types": "./dist/esm/models/errors/index.d.ts",
         "default": "./dist/esm/models/errors/index.js"
       },
@@ -73,7 +73,7 @@
     },
     "./models": {
       "import": {
-        "ominity-api-typescript/source": "./src/models/index.ts",
+        "@ominity/api-typescript/source": "./src/models/index.ts",
         "types": "./dist/esm/models/index.d.ts",
         "default": "./dist/esm/models/index.js"
       },
@@ -84,7 +84,7 @@
     },
     "./models/operations": {
       "import": {
-        "ominity-api-typescript/source": "./src/models/operations/index.ts",
+        "@ominity/api-typescript/source": "./src/models/operations/index.ts",
         "types": "./dist/esm/models/operations/index.d.ts",
         "default": "./dist/esm/models/operations/index.js"
       },
@@ -95,7 +95,7 @@
     },
     "./*.js": {
       "import": {
-        "ominity-api-typescript/source": "./src/*.ts",
+        "@ominity/api-typescript/source": "./src/*.ts",
         "types": "./dist/esm/*.d.ts",
         "default": "./dist/esm/*.js"
       },
@@ -106,7 +106,7 @@
     },
     "./*": {
       "import": {
-        "ominity-api-typescript/source": "./src/*.ts",
+        "@ominity/api-typescript/source": "./src/*.ts",
         "types": "./dist/esm/*.d.ts",
         "default": "./dist/esm/*.js"
       },

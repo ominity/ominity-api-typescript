@@ -1,6 +1,6 @@
 <!-- Start SDK Example Usage [usage] -->
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 
 const ominity = new Ominity({
   serverURL: "https://tenant-a.example.com/api",

@@ -1,6 +1,6 @@
-# ominity-api-typescript
+# @ominity/api-typescript
 
-Developer-friendly & type-safe Typescript SDK specifically catered to leverage *ominity-api-typescript* API.
+Developer-friendly & type-safe Typescript SDK specifically catered to leverage *@ominity/api-typescript* API.
 
 <br /><br />
 > [!IMPORTANT]
@@ -19,7 +19,7 @@ Documentation: https://docs.ominity.com
 <!-- Start Table of Contents [toc] -->
 ## Table of Contents
 <!-- $toc-max-depth=2 -->
-* [ominity-api-typescript](#ominity-api-typescript)
+* [@ominity/api-typescript](#ominityapi-typescript)
   * [SDK Installation](#sdk-installation)
   * [Requirements](#requirements)
   * [SDK Example Usage](#sdk-example-usage)
@@ -46,25 +46,25 @@ The SDK can be installed with either [npm](https://www.npmjs.com/), [pnpm](https
 ### NPM
 
 ```bash
-npm add ominity-api-typescript
+npm add @ominity/api-typescript
 ```
 
 ### PNPM
 
 ```bash
-pnpm add ominity-api-typescript
+pnpm add @ominity/api-typescript
 ```
 
 ### Bun
 
 ```bash
-bun add ominity-api-typescript
+bun add @ominity/api-typescript
 ```
 
 ### Yarn
 
 ```bash
-yarn add ominity-api-typescript
+yarn add @ominity/api-typescript
 ```
 
 > [!NOTE]
@@ -83,7 +83,7 @@ For supported JavaScript runtimes, please consult [RUNTIMES.md](RUNTIMES.md).
 ### Example
 
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 
 const ominity = new Ominity({
   serverURL: "https://tenant-a.example.com/api",
@@ -122,7 +122,7 @@ This SDK supports the following security schemes globally:
 To authenticate with the API, set the `security` object when initializing the SDK client instance. If `security.oAuth` is provided, it will be used; otherwise `security.apiKey` is used.
 For example:
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 
 const ominity = new Ominity({
   serverURL: "https://tenant-a.example.com/api",
@@ -180,7 +180,7 @@ Certain SDK methods accept files as part of a multi-part request. It is possible
 > - **Node.js v18:** A file stream can be created using the `fileFrom` helper from [`fetch-blob/from.js`](https://www.npmjs.com/package/fetch-blob).
 
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 import { openAsBlob } from "node:fs";
 
 const ominity = new Ominity({
@@ -213,7 +213,7 @@ Some of the endpoints in this SDK support retries.  If you use the SDK without a
 
 To change the default retry strategy for a single API call, simply provide a retryConfig object to the call:
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 
 const ominity = new Ominity({
   serverURL: "https://tenant-a.example.com/api",
@@ -245,7 +245,7 @@ run();
 
 If you'd like to override the default retry strategy for all operations that support retries, you can provide a retryConfig at SDK initialization:
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 
 const ominity = new Ominity({
   serverURL: "https://tenant-a.example.com/api",
@@ -291,8 +291,8 @@ run();
 
 ### Example
 ```typescript
-import { Ominity } from "ominity-api-typescript";
-import * as errors from "ominity-api-typescript/models/errors";
+import { Ominity } from "@ominity/api-typescript";
+import * as errors from "@ominity/api-typescript/models/errors";
 
 const ominity = new Ominity({
   serverURL: "https://tenant-a.example.com/api",
@@ -357,7 +357,7 @@ run();
 
 Each tenant runs on its own domain, so `serverURL` is required when initializing the SDK client instance. The SDK appends the API version (default `"v1"`) to this base URL. For example:
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 
 const ominity = new Ominity({
   serverURL: "https://tenant-a.example.com/api",
@@ -396,8 +396,8 @@ custom header and a timeout to requests and how to use the `"requestError"` hook
 to log errors:
 
 ```typescript
-import { Ominity } from "ominity-api-typescript";
-import { HTTPClient } from "ominity-api-typescript/lib/http";
+import { Ominity } from "@ominity/api-typescript";
+import { HTTPClient } from "@ominity/api-typescript/lib/http";
 
 const httpClient = new HTTPClient({
   // fetcher takes a function that has the same signature as native `fetch`.
@@ -442,7 +442,7 @@ You can pass a logger that matches `console`'s interface as an SDK option.
 > Beware that debug logging will reveal secrets, like API tokens in headers, in log messages printed to a console or files. It's recommended to use this feature only during local development and not in production.
 
 ```typescript
-import { Ominity } from "ominity-api-typescript";
+import { Ominity } from "@ominity/api-typescript";
 
 const sdk = new Ominity({
   serverURL: "https://tenant-a.example.com/api",
