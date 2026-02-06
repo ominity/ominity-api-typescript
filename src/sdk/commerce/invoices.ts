@@ -13,7 +13,7 @@ export class Invoices extends ClientSDK {
      * List invoices.
      */
     async list(
-        request?: operations.InvoicesListParams | undefined,
+        request?: operations.ListInvoicesRequest | undefined,
         options?: RequestOptions,
     ): Promise<operations.ListInvoicesResponse> {
         return unwrapAsync(invoicesList(

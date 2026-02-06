@@ -9,7 +9,6 @@ import { OpenEnum } from "../../types/enums.js";
 import { Address, Address$inboundSchema } from "./address.js";
 import { CurrencyAmount, CurrencyAmount$inboundSchema } from "../common/amount.js";
 import { HalLinks, HalLinks$inboundSchema } from "../hal.js";
-import { buildPaginated, Paginated } from "../pagination.js";
 
 export const InvoiceStatus = {
     Paid: "paid",
@@ -75,22 +74,3 @@ export const Invoice$inboundSchema: z.ZodType<Invoice> = z.object({
     createdAt: z.string(),
     _links: HalLinks$inboundSchema.optional(),
 }).transform((v) => remap$(v, { _links: "links" }) as Invoice);
-
-export type InvoicesListResponse = Paginated<Invoice>;
-
-/** @internal */
-export const InvoicesListResponse$inboundSchema: z.ZodType<
-    InvoicesListResponse
-> = z.object({
-    _embedded: z.object({
-        invoices: z.array(Invoice$inboundSchema),
-    }),
-    count: z.number(),
-    _links: HalLinks$inboundSchema.optional(),
-}).transform((v) =>
-    buildPaginated(
-        v._embedded.invoices,
-        v.count,
-        v._links,
-    )
-);

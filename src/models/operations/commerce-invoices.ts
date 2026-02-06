@@ -1,52 +1,87 @@
 /*
- * Commerce invoices operations.
+ * Commerce Invoices operations.
  */
 
 import * as z from "zod/v4";
-import { Invoice, InvoicesListResponse } from "../commerce/invoice.js";
+import { buildPaginated, Paginated } from "../pagination.js";
+import { Invoice, Invoice$inboundSchema } from "../commerce/invoice.js";
+import { HalLinks$inboundSchema } from "../hal.js";
 
-export type InvoicesListParams = {
+export type ListInvoicesRequest = {
+    /**
+     * Include related resources.
+     */
+    include?: string | undefined;
+    /**
+     * Filter by fields.
+     */
+    filter?: Record<string, any> | undefined;
+    /**
+     * Sort by fields.
+     */
+    sort?: string | undefined;
+    /**
+     * Page number.
+     */
     page?: number | undefined;
+    /**
+     * Page limit.
+     */
     limit?: number | undefined;
-    include?: string | string[] | undefined;
-    filter?: Record<string, unknown> | string | undefined;
-    sort?: string | string[] | undefined;
 };
 
-export type InvoiceGetParams = {
-    include?: string | string[] | undefined;
-};
+export type ListInvoicesResponse = Paginated<Invoice>;
 
-export type ListInvoicesRequest = InvoicesListParams;
-export type ListInvoicesResponse = InvoicesListResponse;
+/** @internal */
+export const ListInvoicesRequest$outboundSchema: z.ZodType<
+    ListInvoicesRequest
+> = z.object({
+    include: z.string().optional(),
+    filter: z.record(z.string(), z.any()).optional(),
+    sort: z.string().optional(),
+    page: z.number().optional(),
+    limit: z.number().optional(),
+});
 
-export type GetInvoiceRequest = InvoiceGetParams & {
-    id: number | string;
+/** @internal */
+export const ListInvoicesResponse$inboundSchema: z.ZodType<
+    ListInvoicesResponse
+> = z.object({
+    _embedded: z.object({
+        invoices: z.array(Invoice$inboundSchema),
+    }),
+    count: z.number(),
+    _links: HalLinks$inboundSchema.optional(),
+}).transform((v) =>
+    buildPaginated(
+        v._embedded.invoices,
+        v.count,
+        v._links,
+    )
+);
+
+export type GetInvoiceRequest = {
+    /**
+     * Invoice ID.
+     */
+    id: number;
+    /**
+     * Include related resources.
+     */
+    include?: string | undefined;
 };
 
 export type GetInvoiceResponse = Invoice;
 
 /** @internal */
-export const InvoicesListParams$outboundSchema: z.ZodType<
-    InvoicesListParams
+export const GetInvoiceRequest$outboundSchema: z.ZodType<
+    GetInvoiceRequest
 > = z.object({
-    page: z.number().int().optional(),
-    limit: z.number().int().optional(),
-    include: z.union([z.string(), z.array(z.string())]).optional(),
-    filter: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
-    sort: z.union([z.string(), z.array(z.string())]).optional(),
-}).loose();
+    id: z.number(),
+    include: z.string().optional(),
+});
 
 /** @internal */
-export const InvoiceGetParams$outboundSchema: z.ZodType<InvoiceGetParams> = z
-    .object({
-        include: z.union([z.string(), z.array(z.string())]).optional(),
-    })
-    .loose();
-
-/** @internal */
-export const GetInvoiceRequest$outboundSchema: z.ZodType<GetInvoiceRequest> =
-    z.object({
-        id: z.union([z.string(), z.number()]),
-        include: z.union([z.string(), z.array(z.string())]).optional(),
-    }).loose();
+export const GetInvoiceResponse$inboundSchema: z.ZodType<
+    GetInvoiceResponse
+> = Invoice$inboundSchema;
