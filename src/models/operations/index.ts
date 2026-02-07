@@ -23,3 +23,4 @@ export * from "./settings-payment-methods.js";
 export * from "./me.js";
 export * from "./users.js";
 export * from "./users-logins.js";
+export * from "./admins.js";
