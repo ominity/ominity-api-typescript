@@ -16,3 +16,7 @@ export * from "./commerce-shipping-methods.js";
 export * from "./commerce-shipping-zones.js";
 export * from "./commerce-reviews.js";
 export * from "./commerce-currencies.js";
+export * from "./settings-languages.js";
+export * from "./settings-countries.js";
+export * from "./settings-social-providers.js";
+export * from "./settings-payment-methods.js";
