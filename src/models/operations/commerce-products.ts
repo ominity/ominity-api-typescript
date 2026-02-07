@@ -1,53 +1,146 @@
 /*
- * Commerce products operations.
+ * Commerce Products operations.
  */
 
 import * as z from "zod/v4";
-import { Product, ProductsListResponse } from "../commerce/product.js";
+import { buildPaginated, Paginated } from "../pagination.js";
+import { Product, Product$inboundSchema } from "../commerce/product.js";
+import { ProductOffer, ProductOffer$inboundSchema } from "../commerce/product-offer.js";
+import { HalLinks$inboundSchema } from "../hal.js";
 
-export type ProductsListParams = {
+export type ListProductsRequest = {
+  /**
+   * Include related resources.
+   */
+  include?: string | undefined;
+  /**
+   * Filter by fields.
+   */
+  filter?: Record<string, any> | undefined;
+  /**
+   * Sort by fields.
+   */
+  sort?: string | undefined;
+  /**
+   * Page number.
+   */
   page?: number | undefined;
+  /**
+   * Page limit.
+   */
   limit?: number | undefined;
-  include?: string | string[] | undefined;
-  filter?: Record<string, unknown> | string | undefined;
-  sort?: string | string[] | undefined;
 };
 
-export type ProductGetParams = {
-  include?: string | string[] | undefined;
-};
+export type ListProductsResponse = Paginated<Product>;
 
-export type ListProductsRequest = ProductsListParams;
-export type ListProductsResponse = ProductsListResponse;
+/** @internal */
+export const ListProductsRequest$outboundSchema: z.ZodType<
+  ListProductsRequest
+> = z.object({
+  include: z.string().optional(),
+  filter: z.record(z.string(), z.any()).optional(),
+  sort: z.string().optional(),
+  page: z.number().optional(),
+  limit: z.number().optional(),
+});
 
-export type GetProductRequest = ProductGetParams & {
-  id: number | string;
+/** @internal */
+export const ListProductsResponse$inboundSchema: z.ZodType<
+  ListProductsResponse
+> = z.object({
+  _embedded: z.object({
+    products: z.array(Product$inboundSchema),
+  }),
+  count: z.number(),
+  _links: HalLinks$inboundSchema.optional(),
+}).transform((v) =>
+  buildPaginated(
+    v._embedded.products,
+    v.count,
+    v._links,
+  )
+);
+
+export type GetProductRequest = {
+  /**
+   * Product ID.
+   */
+  id: number;
+  /**
+   * Include related resources.
+   */
+  include?: string | undefined;
 };
 
 export type GetProductResponse = Product;
 
 /** @internal */
-export const ProductsListParams$outboundSchema: z.ZodType<ProductsListParams> = z
-  .object({
-    page: z.number().int().optional(),
-    limit: z.number().int().optional(),
-    include: z.union([z.string(), z.array(z.string())]).optional(),
-    filter: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
-    sort: z.union([z.string(), z.array(z.string())]).optional(),
-  })
-  .loose();
+export const GetProductRequest$outboundSchema: z.ZodType<
+  GetProductRequest
+> = z.object({
+  id: z.number(),
+  include: z.string().optional(),
+});
 
 /** @internal */
-export const ProductGetParams$outboundSchema: z.ZodType<ProductGetParams> = z
-  .object({
-    include: z.union([z.string(), z.array(z.string())]).optional(),
-  })
-  .loose();
+export const GetProductResponse$inboundSchema: z.ZodType<
+  GetProductResponse
+> = Product$inboundSchema;
+
+export type ListProductOffersRequest = {
+  /**
+   * Product ID.
+   */
+  id: number;
+  /**
+   * Include related resources.
+   */
+  include?: string | undefined;
+  /**
+   * Filter by fields.
+   */
+  filter?: Record<string, any> | undefined;
+  /**
+   * Sort by fields.
+   */
+  sort?: string | undefined;
+  /**
+   * Page number.
+   */
+  page?: number | undefined;
+  /**
+   * Page limit.
+   */
+  limit?: number | undefined;
+};
+
+export type ListProductOffersResponse = Paginated<ProductOffer>;
 
 /** @internal */
-export const GetProductRequest$outboundSchema: z.ZodType<GetProductRequest> = z
-  .object({
-    id: z.union([z.string(), z.number()]),
-    include: z.union([z.string(), z.array(z.string())]).optional(),
-  })
-  .loose();
+export const ListProductOffersRequest$outboundSchema: z.ZodType<
+  ListProductOffersRequest
+> = z.object({
+  id: z.number(),
+  include: z.string().optional(),
+  filter: z.record(z.string(), z.any()).optional(),
+  sort: z.string().optional(),
+  page: z.number().optional(),
+  limit: z.number().optional(),
+});
+
+/** @internal */
+export const ListProductOffersResponse$inboundSchema: z.ZodType<
+  ListProductOffersResponse
+> = z.object({
+  _embedded: z.object({
+    product_offers: z.array(ProductOffer$inboundSchema),
+  }),
+  count: z.number(),
+  _links: HalLinks$inboundSchema.optional(),
+}).transform((v) =>
+  buildPaginated(
+    v._embedded.product_offers,
+    v.count,
+    v._links,
+  )
+);

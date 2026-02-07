@@ -1,48 +1,33 @@
 /*
- * SDK module: Commerce Products
+ * Commerce Products SDK.
  */
 
-import { productsGet } from "../../funcs/commerce/productsGet.js";
 import { productsList } from "../../funcs/commerce/productsList.js";
+import { productsGet } from "../../funcs/commerce/productsGet.js";
+import { productsOffersList } from "../../funcs/commerce/productsOffersList.js";
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import * as operations from "../../models/operations/index.js";
 import { unwrapAsync } from "../../types/fp.js";
 
-export type ProductsListParams = operations.ProductsListParams;
-export type ProductGetParams = operations.ProductGetParams;
-
 export class Products extends ClientSDK {
-  /**
-   * List products
-   */
   async list(
-    params?: ProductsListParams,
+    request?: operations.ListProductsRequest | undefined,
     options?: RequestOptions,
   ): Promise<operations.ListProductsResponse> {
-    return unwrapAsync(productsList(
-      this,
-      params,
-      options,
-    ));
+    return unwrapAsync(productsList(this, request, options));
   }
 
-  /**
-   * Get a product by ID
-   */
   async get(
-    id: number | string,
-    params?: ProductGetParams,
+    request: operations.GetProductRequest,
     options?: RequestOptions,
   ): Promise<operations.GetProductResponse> {
-    const request: operations.GetProductRequest = {
-      id,
-      ...(params ?? {}),
-    };
+    return unwrapAsync(productsGet(this, request, options));
+  }
 
-    return unwrapAsync(productsGet(
-      this,
-      request,
-      options,
-    ));
+  async listOffers(
+    request: operations.ListProductOffersRequest,
+    options?: RequestOptions,
+  ): Promise<operations.ListProductOffersResponse> {
+    return unwrapAsync(productsOffersList(this, request, options));
   }
 }

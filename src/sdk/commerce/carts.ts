@@ -1,49 +1,24 @@
 /*
- * SDK module: Commerce Carts
+ * Commerce Carts SDK.
  */
 
+import { cartsList } from "../../funcs/commerce/cartsList.js";
 import { cartsCreate } from "../../funcs/commerce/cartsCreate.js";
 import { cartsGet } from "../../funcs/commerce/cartsGet.js";
-import { cartsList } from "../../funcs/commerce/cartsList.js";
 import { cartsUpdate } from "../../funcs/commerce/cartsUpdate.js";
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import * as operations from "../../models/operations/index.js";
 import { unwrapAsync } from "../../types/fp.js";
 
-export type CartsListParams = operations.CartsListParams;
-export type CartGetParams = operations.CartGetParams;
-export type CartCreateInput = operations.CartCreateInput;
-export type CartUpdateInput = operations.CartUpdateInput;
-
 export class Carts extends ClientSDK {
   /**
-   * List carts
+   * List carts.
    */
   async list(
-    params?: CartsListParams,
+    request?: operations.ListCartsRequest | undefined,
     options?: RequestOptions,
   ): Promise<operations.ListCartsResponse> {
     return unwrapAsync(cartsList(
-      this,
-      params,
-      options,
-    ));
-  }
-
-  /**
-   * Get a cart by ID
-   */
-  async get(
-    id: string,
-    params?: CartGetParams,
-    options?: RequestOptions,
-  ): Promise<operations.GetCartResponse> {
-    const request: operations.GetCartRequest = {
-      id,
-      ...(params ?? {}),
-    };
-
-    return unwrapAsync(cartsGet(
       this,
       request,
       options,
@@ -51,30 +26,44 @@ export class Carts extends ClientSDK {
   }
 
   /**
-   * Create a cart
+   * Create cart.
    */
   async create(
-    body: CartCreateInput,
+    request: operations.CreateCartRequest,
     options?: RequestOptions,
   ): Promise<operations.CreateCartResponse> {
     return unwrapAsync(cartsCreate(
       this,
-      body,
+      request,
       options,
     ));
   }
 
   /**
-   * Update a cart
+   * Get cart.
+   */
+  async get(
+    id: string,
+    options?: RequestOptions & { include?: string },
+  ): Promise<operations.GetCartResponse> {
+    return unwrapAsync(cartsGet(
+      this,
+      { id, include: options?.include },
+      options,
+    ));
+  }
+
+  /**
+   * Update cart.
    */
   async update(
     id: string,
-    body: CartUpdateInput,
+    data: Record<string, any>,
     options?: RequestOptions,
   ): Promise<operations.UpdateCartResponse> {
     return unwrapAsync(cartsUpdate(
       this,
-      { id, body },
+      { id, data },
       options,
     ));
   }

@@ -4,13 +4,13 @@ import { RetryConfig } from "../lib/retries.js";
 import { SecurityState } from "../lib/security.js";
 
 export type HookContext = {
-  baseURL: string | URL;
+  baseURL: string | URL | null;
   operationID: string;
   oAuth2Scopes: string[] | null;
   securitySource?: any | (() => Promise<any>);
-  retryConfig: RetryConfig;
+  retryConfig: RetryConfig | undefined;
   resolvedSecurity: SecurityState | null;
-  options: SDKOptions;
+  options: SDKOptions | any;
 };
 
 export type Awaitable<T> = T | Promise<T>;

@@ -1,38 +1,69 @@
-/*
- * Cart model.
- */
-
 import * as z from "zod/v4";
 import { remap as remap$ } from "../../lib/primitives.js";
-import * as openEnums from "../../types/enums.js";
-import { OpenEnum } from "../../types/enums.js";
-import { Address, Address$inboundSchema } from "./address.js";
-import { CurrencyAmount, CurrencyAmount$inboundSchema } from "../common/amount.js";
-import { HalLinks, HalLinks$inboundSchema } from "../hal.js";
-import { buildPaginated, Paginated } from "../pagination.js";
-import { CartItem, CartItem$inboundSchema } from "./cart-item.js";
+import {
+  CurrencyAmount,
+  CurrencyAmount$inboundSchema,
+  CurrencyAmount$outboundSchema,
+} from "../common/amount.js";
+import {
+  Address,
+  Address$inboundSchema,
+  Address$outboundSchema,
+} from "./address.js";
 
-export const CartStatus = {
-  Open: "open",
-  Completed: "completed",
-  Abandoned: "abandoned",
-  Expired: "expired",
-} as const;
-export type CartStatus = OpenEnum<typeof CartStatus>;
+export type CartLinks = {
+  self: {
+    href: string;
+    type: string;
+  };
+  customer?: {
+    href: string;
+    type: string;
+  };
+};
 
-export const CartType = {
-  Shared: "shared",
-  Default: "default",
-} as const;
-export type CartType = OpenEnum<typeof CartType>;
+/** @internal */
+export const CartLinks$inboundSchema: z.ZodType<CartLinks> = z.object({
+  self: z.object({
+    href: z.string(),
+    type: z.string(),
+  }),
+  customer: z.object({
+    href: z.string(),
+    type: z.string(),
+  }).optional(),
+}) as unknown as z.ZodType<CartLinks>;
+
+/** @internal */
+export const CartLinks$outboundSchema: z.ZodType<CartLinks> = z.object({
+  self: z.object({
+    href: z.string(),
+    type: z.string(),
+  }),
+  customer: z.object({
+    href: z.string(),
+    type: z.string(),
+  }).optional(),
+}) as unknown as z.ZodType<CartLinks>;
+
+/**
+ * @internal
+ * @deprecated This namespace will be removed in future versions. Use schemas and types that are exported directly from this module.
+ */
+export namespace CartLinks$ {
+  /** @deprecated use `CartLinks$inboundSchema` instead. */
+  export const inboundSchema = CartLinks$inboundSchema;
+  /** @deprecated use `CartLinks$outboundSchema` instead. */
+  export const outboundSchema = CartLinks$outboundSchema;
+}
 
 export type Cart = {
   resource: string;
   id: string;
-  status: CartStatus;
-  type: CartType;
-  channelId?: number;
-  languageId?: number | null;
+  status: string;
+  type: string;
+  channelId: number;
+  languageId?: string | null;
   customerId?: number | null;
   userId?: number | null;
   email?: string;
@@ -40,89 +71,106 @@ export type Cart = {
   companyVat?: string;
   billingAddress?: Address;
   shippingAddress?: Address;
-  subtotalAmount?: CurrencyAmount;
-  shippingAmount?: CurrencyAmount;
-  discountAmount?: CurrencyAmount;
-  taxAmount?: CurrencyAmount;
-  totalAmount?: CurrencyAmount;
-  country?: string;
-  currency?: string;
-  isShippingRequired?: boolean;
-  shippingMethodId?: number | null;
-  isTaxExempt?: boolean;
-  items?: CartItem[];
-  itemsCount?: number;
-  itemsExists?: boolean;
-  shippingMethod?: unknown;
-  shippingMethodCount?: number;
-  shippingMethodExists?: boolean;
-  totalQuantity?: number;
-  promotionCodes?: string[];
-  updatedAt?: string;
-  createdAt?: string;
-  links?: HalLinks;
+  subtotalAmount: CurrencyAmount;
+  shippingAmount: CurrencyAmount;
+  discountAmount: CurrencyAmount;
+  taxAmount: CurrencyAmount;
+  totalAmount: CurrencyAmount;
+  country: string;
+  currency: string;
+  isShippingRequired: boolean;
+  shippingMethodId?: string | null;
+  isTaxExempt: boolean;
+  totalQuantity: number;
+  promotionCodes?: Array<string>;
+  updatedAt: string;
+  createdAt: string;
+  links: CartLinks;
 };
 
 /** @internal */
-export const CartStatus$inboundSchema: z.ZodType<CartStatus, unknown> = openEnums
-  .inboundSchema(CartStatus);
-/** @internal */
-export const CartType$inboundSchema: z.ZodType<CartType, unknown> = openEnums
-  .inboundSchema(CartType);
+export const Cart$inboundSchema: z.ZodType<Cart> = z
+  .object({
+    resource: z.string(),
+    id: z.string(),
+    status: z.string(),
+    type: z.string(),
+    channelId: z.number().int(),
+    languageId: z.nullable(z.string()).optional(),
+    customerId: z.nullable(z.number().int()).optional(),
+    userId: z.nullable(z.number().int()).optional(),
+    email: z.string().optional(),
+    companyName: z.string().optional(),
+    companyVat: z.string().optional(),
+    billingAddress: Address$inboundSchema.optional(),
+    shippingAddress: Address$outboundSchema.optional(),
+    subtotalAmount: CurrencyAmount$inboundSchema,
+    shippingAmount: CurrencyAmount$inboundSchema,
+    discountAmount: CurrencyAmount$inboundSchema,
+    taxAmount: CurrencyAmount$inboundSchema,
+    totalAmount: CurrencyAmount$inboundSchema,
+    country: z.string(),
+    currency: z.string(),
+    isShippingRequired: z.boolean(),
+    shippingMethodId: z.nullable(z.string()).optional(),
+    isTaxExempt: z.boolean(),
+    totalQuantity: z.number().int(),
+    promotionCodes: z.array(z.string()).optional(),
+    updatedAt: z.string(),
+    createdAt: z.string(),
+    _links: CartLinks$inboundSchema,
+  })
+  .transform((v) => {
+    return remap$(v, {
+      _links: "links",
+    });
+  }) as unknown as z.ZodType<Cart>;
 
 /** @internal */
-export const Cart$inboundSchema: z.ZodType<Cart> = z.object({
-  resource: z.string(),
-  id: z.string(),
-  status: CartStatus$inboundSchema,
-  type: CartType$inboundSchema,
-  channelId: z.number().optional(),
-  languageId: z.number().nullable().optional(),
-  customerId: z.number().nullable().optional(),
-  userId: z.number().nullable().optional(),
-  email: z.string().optional(),
-  companyName: z.string().optional(),
-  companyVat: z.string().optional(),
-  billingAddress: Address$inboundSchema.optional(),
-  shippingAddress: Address$inboundSchema.optional(),
-  subtotalAmount: CurrencyAmount$inboundSchema.optional(),
-  shippingAmount: CurrencyAmount$inboundSchema.optional(),
-  discountAmount: CurrencyAmount$inboundSchema.optional(),
-  taxAmount: CurrencyAmount$inboundSchema.optional(),
-  totalAmount: CurrencyAmount$inboundSchema.optional(),
-  country: z.string().optional(),
-  currency: z.string().optional(),
-  isShippingRequired: z.boolean().optional(),
-  shippingMethodId: z.number().nullable().optional(),
-  isTaxExempt: z.boolean().optional(),
-  items: z.array(CartItem$inboundSchema).optional(),
-  itemsCount: z.number().optional(),
-  itemsExists: z.boolean().optional(),
-  shippingMethod: z.any().optional(),
-  shippingMethodCount: z.number().optional(),
-  shippingMethodExists: z.boolean().optional(),
-  totalQuantity: z.number().optional(),
-  promotionCodes: z.array(z.string()).optional(),
-  updatedAt: z.string().optional(),
-  createdAt: z.string().optional(),
-  _links: HalLinks$inboundSchema.optional(),
-}).transform((v) => remap$(v, { _links: "links" }) as Cart);
+export const Cart$outboundSchema: z.ZodType<Cart> = z
+  .object({
+    resource: z.string(),
+    id: z.string(),
+    status: z.string(),
+    type: z.string(),
+    channelId: z.number().int(),
+    languageId: z.nullable(z.string()).optional(),
+    customerId: z.nullable(z.number().int()).optional(),
+    userId: z.nullable(z.number().int()).optional(),
+    email: z.string().optional(),
+    companyName: z.string().optional(),
+    companyVat: z.string().optional(),
+    billingAddress: Address$outboundSchema.optional(),
+    shippingAddress: Address$outboundSchema.optional(),
+    subtotalAmount: CurrencyAmount$outboundSchema,
+    shippingAmount: CurrencyAmount$outboundSchema,
+    discountAmount: CurrencyAmount$outboundSchema,
+    taxAmount: CurrencyAmount$outboundSchema,
+    totalAmount: CurrencyAmount$outboundSchema,
+    country: z.string(),
+    currency: z.string(),
+    isShippingRequired: z.boolean(),
+    shippingMethodId: z.nullable(z.string()).optional(),
+    isTaxExempt: z.boolean(),
+    totalQuantity: z.number().int(),
+    promotionCodes: z.array(z.string()).optional(),
+    updatedAt: z.string(),
+    createdAt: z.string(),
+    links: CartLinks$outboundSchema,
+  })
+  .transform((v) => {
+    return remap$(v, {
+      links: "_links",
+    });
+  }) as unknown as z.ZodType<Cart>;
 
-export type CartsListResponse = Paginated<Cart>;
-
-/** @internal */
-export const CartsListResponse$inboundSchema: z.ZodType<
-  CartsListResponse
-> = z.object({
-  _embedded: z.object({
-    carts: z.array(Cart$inboundSchema),
-  }),
-  count: z.number(),
-  _links: HalLinks$inboundSchema.optional(),
-}).transform((v) =>
-  buildPaginated(
-    v._embedded.carts,
-    v.count,
-    v._links,
-  )
-);
+/**
+ * @internal
+ * @deprecated This namespace will be removed in future versions. Use schemas and types that are exported directly from this module.
+ */
+export namespace Cart$ {
+  /** @deprecated use `Cart$inboundSchema` instead. */
+  export const inboundSchema = Cart$inboundSchema;
+  /** @deprecated use `Cart$outboundSchema` instead. */
+  export const outboundSchema = Cart$outboundSchema;
+}

@@ -6,6 +6,7 @@ import { Http } from "./http.js";
 import { Me } from "./me.js";
 import { Settings } from "./settings/index.js";
 import { Users } from "./users/index.js";
+import { Admins } from "./admins.js";
 import type { SDKOptions } from "../lib/config.js";
 import type {
   OminityModuleInput,
@@ -65,5 +66,10 @@ export class Ominity extends ClientSDK {
   private _users?: Users;
   get users(): Users {
     return (this._users ??= new Users(this._options));
+  }
+
+  private _admins?: Admins;
+  get admins(): Admins {
+    return (this._admins ??= new Admins(this._options));
   }
 }

@@ -438,7 +438,7 @@ type BulkQueryEncoder = (
 ) => string;
 
 export function queryEncoder(f: QueryEncoder): BulkQueryEncoder {
-  const bulkEncode = function(
+  const bulkEncode = function (
     values: Record<string, unknown>,
     options?: QueryEncoderOptions,
   ): string {
@@ -474,6 +474,7 @@ export const encodeFormQuery = queryEncoder(encodeForm);
 export const encodeSpaceDelimitedQuery = queryEncoder(encodeSpaceDelimited);
 export const encodePipeDelimitedQuery = queryEncoder(encodePipeDelimited);
 export const encodeDeepObjectQuery = queryEncoder(encodeDeepObject);
+export const encodeSimpleQuery = queryEncoder(encodeSimple);
 
 export function appendForm(
   fd: FormData,
