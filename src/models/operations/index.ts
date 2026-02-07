@@ -24,3 +24,7 @@ export * from "./me.js";
 export * from "./users.js";
 export * from "./users-logins.js";
 export * from "./admins.js";
+export * from "./users-customers.js";
+export * from "./users-oauth-accounts.js";
+export * from "./users-mfa.js";
+export * from "./users-recovery-codes.js";
