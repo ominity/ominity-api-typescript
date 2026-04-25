@@ -1,8 +1,10 @@
 
 import { ClientSDK } from "../lib/sdks.js";
 import { Cms } from "./cms/index.js";
+import { Channels } from "./channels/index.js";
 import { Commerce } from "./commerce/index.js";
 import { Http } from "./http.js";
+import { Localization } from "./localization/index.js";
 import { Me } from "./me.js";
 import { Settings } from "./settings/index.js";
 import { Users } from "./users/index.js";
@@ -48,6 +50,11 @@ export class Ominity extends ClientSDK {
     return (this._cms ??= new Cms(this._options));
   }
 
+  private _channels?: Channels;
+  get channels(): Channels {
+    return (this._channels ??= new Channels(this._options));
+  }
+
   private _settings?: Settings;
   get settings(): Settings {
     return (this._settings ??= new Settings(this._options));
@@ -56,6 +63,11 @@ export class Ominity extends ClientSDK {
   private _http?: Http;
   get http(): Http {
     return (this._http ??= new Http(this._options));
+  }
+
+  private _localization?: Localization;
+  get localization(): Localization {
+    return (this._localization ??= new Localization(this._options));
   }
 
   private _me?: Me;
