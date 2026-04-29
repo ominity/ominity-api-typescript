@@ -94,6 +94,11 @@ async function $do(
     const baseQuery = encodeFormQuery({
         page: payload.page,
         limit: payload.limit,
+        sort: payload.sort,
+        "filter[id]": payload.filter?.id,
+        "filter[providerId]": payload.filter?.providerId,
+        "filter[identifier]": payload.filter?.identifier,
+        "filter[email]": payload.filter?.email,
     });
 
     const query = queryJoin(baseQuery);

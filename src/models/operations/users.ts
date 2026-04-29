@@ -3,6 +3,10 @@
  */
 
 import * as z from "zod/v4";
+import {
+  OAuth2IssuedToken,
+  OAuth2IssuedToken$inboundSchema,
+} from "../identity/oauth2.js";
 import { User, UsersListResponse } from "../identity/users/user.js";
 
 export type UsersListParams = {
@@ -50,6 +54,12 @@ export type UpdateUserRequest = {
 
 export type UpdateUserResponse = User;
 
+export type IssueUserAccessTokenRequest = {
+  id: number | string;
+};
+
+export type IssueUserAccessTokenResponse = OAuth2IssuedToken;
+
 /** @internal */
 export const UsersListParams$outboundSchema: z.ZodType<UsersListParams> = z
   .object({
@@ -94,3 +104,15 @@ export const UpdateUserRequest$outboundSchema: z.ZodType<UpdateUserRequest> = z
       password: z.string().optional(),
     }).loose(),
   }).transform((v) => v as UpdateUserRequest);
+
+/** @internal */
+export const IssueUserAccessTokenRequest$outboundSchema: z.ZodType<
+  IssueUserAccessTokenRequest
+> = z.object({
+  id: z.union([z.string(), z.number()]),
+}).loose();
+
+/** @internal */
+export const IssueUserAccessTokenResponse$inboundSchema: z.ZodType<
+  IssueUserAccessTokenResponse
+> = OAuth2IssuedToken$inboundSchema;

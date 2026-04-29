@@ -23,7 +23,7 @@ import {
 import * as operations from "../../models/operations/index.js";
 import { ValidateRecoveryCodeResponse$inboundSchema } from "../../models/operations/users-recovery-codes.js";
 import { APICall, APIPromise } from "../../types/async.js";
-import { OK, Result } from "../../types/fp.js";
+import { Result } from "../../types/fp.js";
 
 export function usersValidateRecoveryCode(
     client: ClientSDK,
@@ -91,7 +91,7 @@ async function $do(
 
     const headers = new Headers({
         "Content-Type": "application/json",
-        Accept: "*/*",
+        Accept: "application/json",
     });
 
     const securityInput = await extractSecurity(client._options.security);
@@ -162,7 +162,9 @@ async function $do(
         | UnexpectedClientError
         | SDKValidationError
     >(
-        M.nil("2XX", ValidateRecoveryCodeResponse$inboundSchema),
+        M.json(200, ValidateRecoveryCodeResponse$inboundSchema, {
+            ctype: "application/json",
+        }),
         M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
             ctype: "application/hal+json",
         }),
@@ -172,8 +174,5 @@ async function $do(
         return [result, { status: "complete", request: req, response }];
     }
 
-    return [
-        OK(result.value),
-        { status: "complete", request: req, response },
-    ];
+    return [result, { status: "complete", request: req, response }];
 }

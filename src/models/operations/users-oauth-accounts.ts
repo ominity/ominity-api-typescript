@@ -20,6 +20,19 @@ export type ListUserOAuthAccountsRequest = {
      * Page limit.
      */
     limit?: number | undefined;
+    /**
+     * Sort by fields. Prefix with "-" for descending.
+     */
+    sort?: string | undefined;
+    /**
+     * Filter query.
+     */
+    filter?: {
+        id?: number | undefined;
+        providerId?: number | undefined;
+        identifier?: string | undefined;
+        email?: string | undefined;
+    } | undefined;
 };
 
 export type ListUserOAuthAccountsResponse = Paginated<SocialProviderUser>;
@@ -31,6 +44,13 @@ export const ListUserOAuthAccountsRequest$outboundSchema: z.ZodType<
     id: z.number(),
     page: z.number().optional(),
     limit: z.number().optional(),
+    sort: z.string().optional(),
+    filter: z.object({
+        id: z.number().optional(),
+        providerId: z.number().optional(),
+        identifier: z.string().optional(),
+        email: z.string().optional(),
+    }).optional(),
 });
 
 /** @internal */

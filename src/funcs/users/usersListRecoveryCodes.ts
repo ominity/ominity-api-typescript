@@ -23,9 +23,8 @@ import {
 } from "../../models/errors/http-client-errors.js";
 import * as operations from "../../models/operations/index.js";
 import { ListUserRecoveryCodesResponse$inboundSchema } from "../../models/operations/users-recovery-codes.js";
-import { applyPaginationParams } from "../../models/pagination.js";
 import { APICall, APIPromise } from "../../types/async.js";
-import { OK, Result } from "../../types/fp.js";
+import { Result } from "../../types/fp.js";
 
 export function usersListRecoveryCodes(
     client: ClientSDK,
@@ -92,8 +91,9 @@ async function $do(
     ) || "";
 
     const baseQuery = encodeFormQuery({
-        page: payload.page,
-        limit: payload.limit,
+        sort: payload.sort,
+        "filter[id]": payload.filter?.id,
+        "filter[active]": payload.filter?.active,
     });
 
     const query = queryJoin(baseQuery);
@@ -183,8 +183,5 @@ async function $do(
         return [result, { status: "complete", request: req, response }];
     }
 
-    return [
-        OK(applyPaginationParams(result.value, payload)),
-        { status: "complete", request: req, response },
-    ];
+    return [result, { status: "complete", request: req, response }];
 }

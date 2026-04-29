@@ -14,6 +14,10 @@ export type UserMfaMethod = {
     verifiedAt?: string | null;
     lastUsedAt?: string | null;
     lastSentAt?: string | null;
+    details?: {
+        qrCode?: string | undefined;
+        secret?: string | undefined;
+    } | undefined;
     links?: HalLinks;
 };
 
@@ -26,6 +30,10 @@ export const UserMfaMethod$inboundSchema: z.ZodType<UserMfaMethod> = z.object({
     verifiedAt: z.string().nullable().optional(),
     lastUsedAt: z.string().nullable().optional(),
     lastSentAt: z.string().nullable().optional(),
+    details: z.object({
+        qrCode: z.string().optional(),
+        secret: z.string().optional(),
+    }).optional(),
     _links: HalLinks$inboundSchema.optional(),
 }).loose().transform((v) => {
     return remap$(v, {

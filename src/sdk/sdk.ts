@@ -6,6 +6,7 @@ import { Commerce } from "./commerce/index.js";
 import { Http } from "./http.js";
 import { Localization } from "./localization/index.js";
 import { Me } from "./me.js";
+import { OAuth2 } from "./oauth2.js";
 import { Settings } from "./settings/index.js";
 import { Users } from "./users/index.js";
 import { Admins } from "./admins.js";
@@ -68,6 +69,11 @@ export class Ominity extends ClientSDK {
   private _localization?: Localization;
   get localization(): Localization {
     return (this._localization ??= new Localization(this._options));
+  }
+
+  private _oauth2?: OAuth2;
+  get oauth2(): OAuth2 {
+    return (this._oauth2 ??= new OAuth2(this._options));
   }
 
   private _me?: Me;

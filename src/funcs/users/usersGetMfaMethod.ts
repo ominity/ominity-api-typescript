@@ -1,9 +1,11 @@
 /*
- * List user MFA methods.
+ * Get user MFA method details.
  */
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
-import { encodeSimple } from "../../lib/encodings.js";
+import {
+    encodeSimple,
+} from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
 import { extractSecurity, resolveGlobalSecurity } from "../../lib/security.js";
@@ -18,17 +20,17 @@ import {
     UnexpectedClientError,
 } from "../../models/errors/http-client-errors.js";
 import * as operations from "../../models/operations/index.js";
-import { ListUserMfaMethodsResponse$inboundSchema } from "../../models/operations/users-mfa.js";
+import { GetMfaMethodResponse$inboundSchema } from "../../models/operations/users-mfa.js";
 import { APICall, APIPromise } from "../../types/async.js";
 import { Result } from "../../types/fp.js";
 
-export function usersListMfaMethods(
+export function usersGetMfaMethod(
     client: ClientSDK,
-    request: operations.ListUserMfaMethodsRequest,
+    request: operations.GetMfaMethodRequest,
     options?: RequestOptions,
 ): APIPromise<
     Result<
-        operations.ListUserMfaMethodsResponse,
+        operations.GetMfaMethodResponse,
         | errors.ErrorResponse
         | errors.OminityDefaultError
         | ResponseValidationError
@@ -49,12 +51,12 @@ export function usersListMfaMethods(
 
 async function $do(
     client: ClientSDK,
-    request: operations.ListUserMfaMethodsRequest,
+    request: operations.GetMfaMethodRequest,
     options?: RequestOptions,
 ): Promise<
     [
         Result<
-            operations.ListUserMfaMethodsResponse,
+            operations.GetMfaMethodResponse,
             | errors.ErrorResponse
             | errors.OminityDefaultError
             | ResponseValidationError
@@ -71,7 +73,7 @@ async function $do(
     const parsed = safeParse(
         request,
         (value) =>
-            operations.ListUserMfaMethodsRequest$outboundSchema.parse(value),
+            operations.GetMfaMethodRequest$outboundSchema.parse(value),
         "Input validation failed",
     );
     if (!parsed.ok) {
@@ -81,8 +83,8 @@ async function $do(
     const body = null;
 
     const path = encodeSimple(
-        "/users/{id}/mfa-methods",
-        { "id": payload.id },
+        "/users/{id}/mfa-methods/{method}",
+        { "id": payload.id, "method": payload.method },
         { explode: false, charEncoding: "percent" },
     ) || "";
 
@@ -96,7 +98,7 @@ async function $do(
     const context = {
         options: client._options,
         baseURL: options?.serverURL ?? client._baseURL ?? "",
-        operationID: "users.listMfaMethods",
+        operationID: "users.getMfaMethod",
         oAuth2Scopes: null,
         resolvedSecurity: requestSecurity,
         securitySource: client._options.security,
@@ -147,7 +149,7 @@ async function $do(
     };
 
     const [result] = await M.match<
-        operations.ListUserMfaMethodsResponse,
+        operations.GetMfaMethodResponse,
         | errors.ErrorResponse
         | errors.OminityDefaultError
         | ResponseValidationError
@@ -158,7 +160,7 @@ async function $do(
         | UnexpectedClientError
         | SDKValidationError
     >(
-        M.json(200, ListUserMfaMethodsResponse$inboundSchema, {
+        M.json(200, GetMfaMethodResponse$inboundSchema, {
             ctype: "application/hal+json",
         }),
         M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {

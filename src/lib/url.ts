@@ -28,3 +28,35 @@ export function pathToFunc(
     });
   };
 }
+
+/**
+ * Returns a copy of a base URL with the configured API version suffix removed.
+ * Useful for endpoints that are mounted outside `/api/{version}`.
+ */
+export function baseURLWithoutAPIVersion(
+  baseURL: string | URL | null | undefined,
+  apiVersion: string | undefined,
+): URL | undefined {
+  if (!baseURL) {
+    return undefined;
+  }
+
+  const normalizedVersion = apiVersion ?? "v1";
+  const url = new URL(baseURL.toString());
+
+  const pathname = url.pathname.replace(/\/+$/, "");
+  const versionSuffix = normalizedVersion ? `/${normalizedVersion}` : "";
+
+  if (versionSuffix && pathname.endsWith(versionSuffix)) {
+    const nextPath = pathname.slice(0, -versionSuffix.length);
+    url.pathname = `${nextPath || "/"}`;
+  } else {
+    url.pathname = `${pathname || "/"}`;
+  }
+
+  if (!url.pathname.endsWith("/")) {
+    url.pathname = `${url.pathname}/`;
+  }
+
+  return url;
+}

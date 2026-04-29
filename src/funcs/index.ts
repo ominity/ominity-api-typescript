@@ -17,6 +17,7 @@ export * from "./commerce/cartItemsUpdate.js";
 export * from "./commerce/cartItemsDelete.js";
 export * from "./channels/index.js";
 export * from "./localization/index.js";
+export * from "./oauth2/index.js";
 export * from "./meGet.js";
 export * from "./users/index.js";
 export * from "./admins/index.js";

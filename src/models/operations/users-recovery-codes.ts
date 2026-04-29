@@ -13,13 +13,16 @@ export type ListUserRecoveryCodesRequest = {
      */
     id: number;
     /**
-     * Page number.
+     * Sort by fields. Prefix with "-" for descending.
      */
-    page?: number | undefined;
+    sort?: string | undefined;
     /**
-     * Page limit.
+     * Filter query.
      */
-    limit?: number | undefined;
+    filter?: {
+        id?: number | undefined;
+        active?: boolean | undefined;
+    } | undefined;
 };
 
 export type ListUserRecoveryCodesResponse = Paginated<UserRecoveryCode>;
@@ -29,8 +32,11 @@ export const ListUserRecoveryCodesRequest$outboundSchema: z.ZodType<
     ListUserRecoveryCodesRequest
 > = z.object({
     id: z.number(),
-    page: z.number().optional(),
-    limit: z.number().optional(),
+    sort: z.string().optional(),
+    filter: z.object({
+        id: z.number().optional(),
+        active: z.boolean().optional(),
+    }).optional(),
 });
 
 /** @internal */
@@ -55,21 +61,38 @@ export type RegenerateRecoveryCodesRequest = {
      * User ID.
      */
     id: number;
+    /**
+     * Confirmation flag.
+     */
+    confirm: boolean;
 };
 
-export type RegenerateRecoveryCodesResponse = Array<UserRecoveryCode>;
+export type RegenerateRecoveryCodesResponse = Paginated<UserRecoveryCode>;
 
 /** @internal */
 export const RegenerateRecoveryCodesRequest$outboundSchema: z.ZodType<
     RegenerateRecoveryCodesRequest
 > = z.object({
     id: z.number(),
+    confirm: z.boolean(),
 });
 
 /** @internal */
 export const RegenerateRecoveryCodesResponse$inboundSchema: z.ZodType<
     RegenerateRecoveryCodesResponse
-> = z.array(UserRecoveryCode$inboundSchema);
+> = z.object({
+    _embedded: z.object({
+        user_recovery_codes: z.array(UserRecoveryCode$inboundSchema),
+    }),
+    count: z.number(),
+    _links: HalLinks$inboundSchema.optional(),
+}).transform((v) =>
+    buildPaginated(
+        v._embedded.user_recovery_codes,
+        v.count,
+        v._links,
+    )
+);
 
 export type ValidateRecoveryCodeRequest = {
     /**
@@ -82,7 +105,10 @@ export type ValidateRecoveryCodeRequest = {
     code: string;
 };
 
-export type ValidateRecoveryCodeResponse = void;
+export type ValidateRecoveryCodeResponse = {
+    success: boolean;
+    message: string;
+};
 
 /** @internal */
 export const ValidateRecoveryCodeRequest$outboundSchema: z.ZodType<
@@ -95,4 +121,7 @@ export const ValidateRecoveryCodeRequest$outboundSchema: z.ZodType<
 /** @internal */
 export const ValidateRecoveryCodeResponse$inboundSchema: z.ZodType<
     ValidateRecoveryCodeResponse
-> = z.void();
+> = z.object({
+    success: z.boolean(),
+    message: z.string(),
+}).loose();

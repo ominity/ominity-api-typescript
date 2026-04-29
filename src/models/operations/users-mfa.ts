@@ -12,14 +12,6 @@ export type ListUserMfaMethodsRequest = {
      * User ID.
      */
     id: number;
-    /**
-     * Page number.
-     */
-    page?: number | undefined;
-    /**
-     * Page limit.
-     */
-    limit?: number | undefined;
 };
 
 export type ListUserMfaMethodsResponse = Paginated<UserMfaMethod>;
@@ -29,8 +21,6 @@ export const ListUserMfaMethodsRequest$outboundSchema: z.ZodType<
     ListUserMfaMethodsRequest
 > = z.object({
     id: z.number(),
-    page: z.number().optional(),
-    limit: z.number().optional(),
 });
 
 /** @internal */
@@ -76,6 +66,32 @@ export const EnableMfaResponse$inboundSchema: z.ZodType<
     EnableMfaResponse
 > = UserMfaMethod$inboundSchema;
 
+export type GetMfaMethodRequest = {
+    /**
+     * User ID.
+     */
+    id: number;
+    /**
+     * MFA Method.
+     */
+    method: string;
+};
+
+export type GetMfaMethodResponse = UserMfaMethod;
+
+/** @internal */
+export const GetMfaMethodRequest$outboundSchema: z.ZodType<
+    GetMfaMethodRequest
+> = z.object({
+    id: z.number(),
+    method: z.string(),
+});
+
+/** @internal */
+export const GetMfaMethodResponse$inboundSchema: z.ZodType<
+    GetMfaMethodResponse
+> = UserMfaMethod$inboundSchema;
+
 export type DisableMfaRequest = {
     /**
      * User ID.
@@ -87,7 +103,10 @@ export type DisableMfaRequest = {
     method: string;
 };
 
-export type DisableMfaResponse = void;
+export type DisableMfaResponse = {
+    success: boolean;
+    message?: string | undefined;
+};
 
 /** @internal */
 export const DisableMfaRequest$outboundSchema: z.ZodType<
@@ -100,7 +119,10 @@ export const DisableMfaRequest$outboundSchema: z.ZodType<
 /** @internal */
 export const DisableMfaResponse$inboundSchema: z.ZodType<
     DisableMfaResponse
-> = z.void();
+> = z.object({
+    success: z.boolean(),
+    message: z.string().optional(),
+}).loose();
 
 export type ValidateMfaRequest = {
     /**
@@ -117,7 +139,10 @@ export type ValidateMfaRequest = {
     code: string;
 };
 
-export type ValidateMfaResponse = UserMfaMethod;
+export type ValidateMfaResponse = {
+    success: boolean;
+    message?: string | undefined;
+};
 
 /** @internal */
 export const ValidateMfaRequest$outboundSchema: z.ZodType<
@@ -131,7 +156,10 @@ export const ValidateMfaRequest$outboundSchema: z.ZodType<
 /** @internal */
 export const ValidateMfaResponse$inboundSchema: z.ZodType<
     ValidateMfaResponse
-> = UserMfaMethod$inboundSchema;
+> = z.object({
+    success: z.boolean(),
+    message: z.string().optional(),
+}).loose();
 
 export type SendMfaRequest = {
     /**
@@ -144,7 +172,10 @@ export type SendMfaRequest = {
     method: string;
 };
 
-export type SendMfaResponse = void;
+export type SendMfaResponse = {
+    success: boolean;
+    message?: string | undefined;
+};
 
 /** @internal */
 export const SendMfaRequest$outboundSchema: z.ZodType<
@@ -157,4 +188,7 @@ export const SendMfaRequest$outboundSchema: z.ZodType<
 /** @internal */
 export const SendMfaResponse$inboundSchema: z.ZodType<
     SendMfaResponse
-> = z.void();
+> = z.object({
+    success: z.boolean(),
+    message: z.string().optional(),
+}).loose();

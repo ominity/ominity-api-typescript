@@ -7,11 +7,15 @@ import { unwrapAsync } from "../../types/fp.js";
 import * as operations from "../../models/operations/index.js";
 import { usersCreate } from "../../funcs/users/usersCreate.js";
 import { usersGet } from "../../funcs/users/usersGet.js";
+import { usersIssueToken } from "../../funcs/users/usersIssueToken.js";
 import { usersList } from "../../funcs/users/usersList.js";
 import { usersUpdate } from "../../funcs/users/usersUpdate.js";
+import { usersSendPasswordResetLink } from "../../funcs/users/usersSendPasswordResetLink.js";
+import { usersResetPassword } from "../../funcs/users/usersResetPassword.js";
 import { usersListCustomers } from "../../funcs/users/usersListCustomers.js";
 import { usersListOAuthAccounts } from "../../funcs/users/usersListOAuthAccounts.js";
 import { usersListMfaMethods } from "../../funcs/users/usersListMfaMethods.js";
+import { usersGetMfaMethod } from "../../funcs/users/usersGetMfaMethod.js";
 import { usersEnableMfa } from "../../funcs/users/usersEnableMfa.js";
 import { usersDisableMfa } from "../../funcs/users/usersDisableMfa.js";
 import { usersValidateMfa } from "../../funcs/users/usersValidateMfa.js";
@@ -72,6 +76,39 @@ export class Users extends ClientSDK {
     ));
   }
 
+  async issueToken(
+    request: operations.IssueUserAccessTokenRequest,
+    options?: RequestOptions,
+  ): Promise<operations.IssueUserAccessTokenResponse> {
+    return unwrapAsync(usersIssueToken(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  async sendPasswordResetLink(
+    request: operations.SendPasswordResetLinkRequest,
+    options?: RequestOptions,
+  ): Promise<operations.SendPasswordResetLinkResponse> {
+    return unwrapAsync(usersSendPasswordResetLink(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  async resetPassword(
+    request: operations.ResetPasswordRequest,
+    options?: RequestOptions,
+  ): Promise<operations.ResetPasswordResponse> {
+    return unwrapAsync(usersResetPassword(
+      this,
+      request,
+      options,
+    ));
+  }
+
   async listCustomers(
     request: operations.ListUserCustomersRequest,
     options?: RequestOptions,
@@ -99,6 +136,17 @@ export class Users extends ClientSDK {
     options?: RequestOptions,
   ): Promise<operations.ListUserMfaMethodsResponse> {
     return unwrapAsync(usersListMfaMethods(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  async getMfaMethod(
+    request: operations.GetMfaMethodRequest,
+    options?: RequestOptions,
+  ): Promise<operations.GetMfaMethodResponse> {
+    return unwrapAsync(usersGetMfaMethod(
       this,
       request,
       options,

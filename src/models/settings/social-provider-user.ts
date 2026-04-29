@@ -9,10 +9,11 @@ import { HalLinks, HalLinks$inboundSchema } from "../hal.js";
 export type SocialProviderUser = {
     resource: "socialprovider_user";
     id: number;
-    userId: number;
-    provider: string;
+    providerId: number;
+    userId?: number | null;
     identifier?: string;
     name?: string;
+    email?: string | null;
     avatar?: string | null;
     updatedAt: string;
     createdAt: string;
@@ -23,10 +24,11 @@ export type SocialProviderUser = {
 export const SocialProviderUser$inboundSchema: z.ZodType<SocialProviderUser> = z.object({
     resource: z.literal("socialprovider_user"),
     id: z.number().int(),
-    userId: z.number().int(),
-    provider: z.string(),
+    providerId: z.number().int(),
+    userId: z.number().int().nullable().optional(),
     identifier: z.string().optional(),
     name: z.string().optional(),
+    email: z.string().nullable().optional(),
     avatar: z.string().nullable().optional(),
     updatedAt: z.string(),
     createdAt: z.string(),

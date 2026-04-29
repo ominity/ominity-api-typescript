@@ -5,6 +5,7 @@
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import {
     encodeSimple,
+    encodeJSON,
 } from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
@@ -22,7 +23,7 @@ import {
 import * as operations from "../../models/operations/index.js";
 import { RegenerateRecoveryCodesResponse$inboundSchema } from "../../models/operations/users-recovery-codes.js";
 import { APICall, APIPromise } from "../../types/async.js";
-import { OK, Result } from "../../types/fp.js";
+import { Result } from "../../types/fp.js";
 
 export function usersRegenerateRecoveryCodes(
     client: ClientSDK,
@@ -80,7 +81,7 @@ async function $do(
         return [parsed, { status: "invalid" }];
     }
     const payload = parsed.value;
-    const body = null;
+    const body = encodeJSON("body", { confirm: payload.confirm }, { explode: true });
 
     const path = encodeSimple(
         "/users/{id}/recovery-codes",
@@ -89,7 +90,8 @@ async function $do(
     ) || "";
 
     const headers = new Headers({
-        Accept: "application/json",
+        "Content-Type": "application/json",
+        Accept: "application/hal+json",
     });
 
     const securityInput = await extractSecurity(client._options.security);
@@ -161,7 +163,7 @@ async function $do(
         | SDKValidationError
     >(
         M.json(200, RegenerateRecoveryCodesResponse$inboundSchema, {
-            ctype: "application/json",
+            ctype: "application/hal+json",
         }),
         M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
             ctype: "application/hal+json",
@@ -172,8 +174,5 @@ async function $do(
         return [result, { status: "complete", request: req, response }];
     }
 
-    return [
-        OK(result.value),
-        { status: "complete", request: req, response },
-    ];
+    return [result, { status: "complete", request: req, response }];
 }
