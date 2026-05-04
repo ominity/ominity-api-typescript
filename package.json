@@ -1,6 +1,6 @@
 {
   "name": "@ominity/api-typescript",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "Ominity",
   "type": "module",
   "tshy": {

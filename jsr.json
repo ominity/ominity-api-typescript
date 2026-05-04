@@ -1,6 +1,6 @@
 {
   "name": "ominity-api-typescript",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "exports": {
     ".": "./src/index.ts",
     "./models/errors": "./src/models/errors/index.ts",

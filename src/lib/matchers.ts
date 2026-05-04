@@ -2,7 +2,11 @@
 import { OminityDefaultError } from "../models/errors/ominity-default-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { ERR, OK, Result } from "../types/fp.js";
-import { matchResponse, matchStatusCode, StatusCodePredicate } from "./http.js";
+import {
+  matchContentType,
+  matchStatusCode,
+  StatusCodePredicate,
+} from "./http.js";
 import { isPlainObject } from "./is-plain-object.js";
 
 export type Encoding =
@@ -176,6 +180,19 @@ export type MatchFunc<T, E> = (
   options?: { resultKey?: string; extraFields?: Record<string, unknown> },
 ) => Promise<[result: Result<T, E>, raw: unknown]>;
 
+function isJsonLikeResponse(response: Response): boolean {
+  const contentType =
+    response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase()
+    || "application/octet-stream";
+  const [type = "", subtype = ""] = contentType.split("/", 2);
+
+  if (type !== "application" || subtype.length === 0) {
+    return false;
+  }
+
+  return subtype === "json" || subtype.endsWith("+json");
+}
+
 export function match<T, E>(
   ...matchers: Array<Matcher<T, E>>
 ): MatchFunc<T, E | OminityDefaultError | ResponseValidationError> {
@@ -193,13 +210,30 @@ export function match<T, E>(
     let matcher: Matcher<T, E> | undefined;
     for (const match of matchers) {
       const { codes } = match;
+      const hasExplicitContentType =
+        "ctype" in match && typeof match.ctype === "string";
       const ctpattern = "ctype" in match
         ? match.ctype
         : DEFAULT_CONTENT_TYPES[match.enc];
-      if (ctpattern && matchResponse(response, codes, ctpattern)) {
+
+      if (!matchStatusCode(response, codes)) {
+        continue;
+      }
+
+      if (!ctpattern) {
         matcher = match;
         break;
-      } else if (!ctpattern && matchStatusCode(response, codes)) {
+      }
+
+      if (matchContentType(response, ctpattern)) {
+        matcher = match;
+        break;
+      }
+
+      // The API often returns HAL+JSON (`application/*+json`) for JSON payloads.
+      // Keep explicit content-type matchers strict, but allow default JSON
+      // matchers to accept any JSON-compatible media type.
+      if (!hasExplicitContentType && match.enc === "json" && isJsonLikeResponse(response)) {
         matcher = match;
         break;
       }
