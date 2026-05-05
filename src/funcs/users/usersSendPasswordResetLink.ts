@@ -157,7 +157,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, SendPasswordResetLinkResponse$inboundSchema, {
-      ctype: "application/json",
+      ctype: "application/hal+json",
     }),
     M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
       ctype: "application/hal+json",
