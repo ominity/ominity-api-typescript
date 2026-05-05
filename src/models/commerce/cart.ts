@@ -63,7 +63,7 @@ export type Cart = {
   status: string;
   type: string;
   channelId: number;
-  languageId?: string | null;
+  languageId?: number | null;
   customerId?: number | null;
   userId?: number | null;
   email?: string;
@@ -96,7 +96,7 @@ export const Cart$inboundSchema: z.ZodType<Cart> = z
     status: z.string(),
     type: z.string(),
     channelId: z.number().int(),
-    languageId: z.nullable(z.string()).optional(),
+    languageId: z.nullable(z.union([z.string(), z.number().int()])).optional(),
     customerId: z.nullable(z.number().int()).optional(),
     userId: z.nullable(z.number().int()).optional(),
     email: z.string().optional(),
@@ -134,7 +134,7 @@ export const Cart$outboundSchema: z.ZodType<Cart> = z
     status: z.string(),
     type: z.string(),
     channelId: z.number().int(),
-    languageId: z.nullable(z.string()).optional(),
+    languageId: z.nullable(z.union([z.string(), z.number().int()])).optional(),
     customerId: z.nullable(z.number().int()).optional(),
     userId: z.nullable(z.number().int()).optional(),
     email: z.string().optional(),
