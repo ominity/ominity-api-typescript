@@ -44,7 +44,8 @@ async function $do(
     | RequestTimeoutError
   >
 > {
-  const path = pathToFunc("/commerce/cart-items/{id}")({
+  const path = pathToFunc("/commerce/carts/{cartId}/items/{id}")({
+    cartId: request.cartId,
     id: request.itemId,
   });
 
@@ -118,4 +119,3 @@ async function $do(
 
   return result;
 }
-
