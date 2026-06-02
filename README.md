@@ -149,6 +149,7 @@ Typed operations are being added. Current namespaces:
 - `commerce`
 - `cms`
 - `settings`
+- `tracking` (front-end event capture via `/tracking/events`)
 - `http` (generic client for unimplemented endpoints)
 
 Use `ominity.http` for endpoints that are not yet implemented in the SDK.

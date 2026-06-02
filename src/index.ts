@@ -7,3 +7,4 @@ export * from "./core.js";
 export * from "./funcs/index.js";
 export * from "./sdk/modules.js";
 export * from "./sdk/sdk.js";
+export * from "./sdk/tracking/index.js";

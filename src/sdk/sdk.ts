@@ -10,6 +10,7 @@ import { OAuth2 } from "./oauth2.js";
 import { Settings } from "./settings/index.js";
 import { Users } from "./users/index.js";
 import { Admins } from "./admins.js";
+import { Tracking } from "./tracking/index.js";
 import type { SDKOptions } from "../lib/config.js";
 import type {
   OminityModuleInput,
@@ -64,6 +65,11 @@ export class Ominity extends ClientSDK {
   private _http?: Http;
   get http(): Http {
     return (this._http ??= new Http(this._options));
+  }
+
+  private _tracking?: Tracking;
+  get tracking(): Tracking {
+    return (this._tracking ??= new Tracking(this.http));
   }
 
   private _localization?: Localization;
