@@ -113,6 +113,14 @@ export class ClientSDK {
     }
   }
 
+  setLanguage(language: string | undefined): this {
+    this._options.language = language;
+    this._propagateLanguage(language);
+    return this;
+  }
+
+  protected _propagateLanguage(_language: string | undefined): void {}
+
   public _createRequest(
     context: HookContext,
     conf: RequestConfig,

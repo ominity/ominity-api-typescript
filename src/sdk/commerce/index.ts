@@ -104,4 +104,21 @@ export class Commerce extends ClientSDK {
   get currencies(): Currencies {
     return (this._currencies ??= new Currencies(this._options));
   }
+
+  protected override _propagateLanguage(language: string | undefined): void {
+    this._cartItems?.setLanguage(language);
+    this._carts?.setLanguage(language);
+    this._categories?.setLanguage(language);
+    this._products?.setLanguage(language);
+    this._invoices?.setLanguage(language);
+    this._productGroups?.setLanguage(language);
+    this._subscriptionIntervals?.setLanguage(language);
+    this._orders?.setLanguage(language);
+    this._payments?.setLanguage(language);
+    this._vatValidations?.setLanguage(language);
+    this._shippingMethods?.setLanguage(language);
+    this._shippingZones?.setLanguage(language);
+    this._reviews?.setLanguage(language);
+    this._currencies?.setLanguage(language);
+  }
 }

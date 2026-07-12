@@ -121,4 +121,12 @@ export class Users extends ClientSDK {
       options,
     ));
   }
+
+  protected override _propagateLanguage(language: string | undefined): void {
+    this._logins?.setLanguage(language);
+    this._customers?.setLanguage(language);
+    this._oauthAccounts?.setLanguage(language);
+    this._mfaMethods?.setLanguage(language);
+    this._recoveryCodes?.setLanguage(language);
+  }
 }

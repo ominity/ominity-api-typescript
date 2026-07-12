@@ -27,4 +27,10 @@ export class Settings extends ClientSDK {
     get paymentMethods(): PaymentMethods {
         return (this._paymentMethods ??= new PaymentMethods(this._options));
     }
+
+    protected override _propagateLanguage(language: string | undefined): void {
+        this._countries?.setLanguage(language);
+        this._socialProviders?.setLanguage(language);
+        this._paymentMethods?.setLanguage(language);
+    }
 }

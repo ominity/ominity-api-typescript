@@ -48,4 +48,13 @@ export class Cms extends ClientSDK {
     get menus(): Menus {
         return (this._menus ??= new Menus(this._options));
     }
+
+    protected override _propagateLanguage(language: string | undefined): void {
+        this._components?.setLanguage(language);
+        this._content?.setLanguage(language);
+        this._contentTypes?.setLanguage(language);
+        this._layouts?.setLanguage(language);
+        this._pages?.setLanguage(language);
+        this._menus?.setLanguage(language);
+    }
 }

@@ -17,5 +17,9 @@ export class Localization extends ClientSDK {
   get locales(): LocalizationLocales {
     return (this._locales ??= new LocalizationLocales(this._options));
   }
-}
 
+  protected override _propagateLanguage(language: string | undefined): void {
+    this._languages?.setLanguage(language);
+    this._locales?.setLanguage(language);
+  }
+}

@@ -57,4 +57,9 @@ export class Channels extends ClientSDK {
       options,
     ));
   }
+
+  protected override _propagateLanguage(language: string | undefined): void {
+    this._types?.setLanguage(language);
+    this._domains?.setLanguage(language);
+  }
 }

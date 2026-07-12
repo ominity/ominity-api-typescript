@@ -96,4 +96,17 @@ export class Ominity extends ClientSDK {
   get admins(): Admins {
     return (this._admins ??= new Admins(this._options));
   }
+
+  protected override _propagateLanguage(language: string | undefined): void {
+    this._commerce?.setLanguage(language);
+    this._cms?.setLanguage(language);
+    this._channels?.setLanguage(language);
+    this._settings?.setLanguage(language);
+    this._http?.setLanguage(language);
+    this._localization?.setLanguage(language);
+    this._oauth2?.setLanguage(language);
+    this._me?.setLanguage(language);
+    this._users?.setLanguage(language);
+    this._admins?.setLanguage(language);
+  }
 }
