@@ -3,7 +3,11 @@
  */
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
-import { encodeFormQuery } from "../../lib/encodings.js";
+import {
+    encodeDeepObjectQuery,
+    encodeFormQuery,
+    queryJoin,
+} from "../../lib/encodings.js";
 
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
@@ -96,12 +100,15 @@ async function $do(
     const safeSlug = encodeURIComponent(payload.slug);
     const path = `/cms/content/${safeSlug}`;
 
-    const query = encodeFormQuery({
-        "filter[id]": payload.filterId,
+    const baseQuery = encodeFormQuery({
         sort: payload.sort,
         page: payload.page,
         limit: payload.limit,
     });
+    const filterQuery = payload.filter != null
+        ? encodeDeepObjectQuery({ filter: payload.filter })
+        : undefined;
+    const query = queryJoin(baseQuery, filterQuery);
 
     const headers = new Headers();
 

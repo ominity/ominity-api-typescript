@@ -9,7 +9,7 @@ import { HalLinks$inboundSchema } from "../hal.js";
 
 export type ListContentRequest = {
     slug: string;
-    filterId?: string | undefined;
+    filter?: Record<string, any> | undefined;
     sort?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
@@ -22,7 +22,7 @@ export const ListContentRequest$outboundSchema: z.ZodType<
     ListContentRequest
 > = z.object({
     slug: z.string(),
-    filterId: z.string().optional(),
+    filter: z.record(z.string(), z.any()).optional(),
     sort: z.string().optional(),
     page: z.number().optional(),
     limit: z.number().optional(),
