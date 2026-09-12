@@ -503,7 +503,16 @@ export const encodeFormQuery = queryEncoder(encodeForm);
 export const encodeSpaceDelimitedQuery = queryEncoder(encodeSpaceDelimited);
 export const encodePipeDelimitedQuery = queryEncoder(encodePipeDelimited);
 export const encodeDeepObjectQuery = queryEncoder(encodeDeepObject);
-export const encodeSimpleQuery = queryEncoder(encodeSimple);
+
+/**
+ * Encodes the flat query objects used by older generated operations.
+ *
+ * OpenAPI's `simple` style applies to path and header parameters, while query
+ * parameters use `form` serialization by default. Keep the generated helper
+ * name for compatibility, but serialize its values as query parameters so an
+ * object such as `{ page: 1, limit: 50 }` becomes `page=1&limit=50`.
+ */
+export const encodeSimpleQuery = encodeFormQuery;
 
 export function appendForm(
   fd: FormData,
