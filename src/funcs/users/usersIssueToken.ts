@@ -159,9 +159,7 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, IssueUserAccessTokenResponse$inboundSchema, {
-      ctype: "application/hal+json",
-    }),
+    M.json(200, IssueUserAccessTokenResponse$inboundSchema),
     M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
       ctype: "application/hal+json",
     }),
