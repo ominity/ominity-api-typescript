@@ -1,11 +1,9 @@
 /*
- * Issue user access token.
+ * Update customer user.
  */
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
-import {
-  encodePath,
-} from "../../lib/encodings.js";
+import { encodeJSON } from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
 import { extractSecurity, resolveGlobalSecurity } from "../../lib/security.js";
@@ -20,17 +18,16 @@ import {
   UnexpectedClientError,
 } from "../../models/errors/http-client-errors.js";
 import * as operations from "../../models/operations/index.js";
-import { IssueUserAccessTokenResponse$inboundSchema } from "../../models/operations/users.js";
 import { APICall, APIPromise } from "../../types/async.js";
 import { Result } from "../../types/fp.js";
 
-export function usersIssueToken(
+export function customerUsersUpdate(
   client: ClientSDK,
-  request: operations.IssueUserAccessTokenRequest,
+  request: operations.UpdateCustomerUserRequest,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.IssueUserAccessTokenResponse,
+    operations.UpdateCustomerUserResponse,
     | errors.ErrorResponse
     | errors.OminityDefaultError
     | ResponseValidationError
@@ -42,21 +39,17 @@ export function usersIssueToken(
     | SDKValidationError
   >
 > {
-  return new APIPromise($do(
-    client,
-    request,
-    options,
-  ));
+  return new APIPromise($do(client, request, options));
 }
 
 async function $do(
   client: ClientSDK,
-  request: operations.IssueUserAccessTokenRequest,
+  request: operations.UpdateCustomerUserRequest,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      operations.IssueUserAccessTokenResponse,
+      operations.UpdateCustomerUserResponse,
       | errors.ErrorResponse
       | errors.OminityDefaultError
       | ResponseValidationError
@@ -72,23 +65,19 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) => operations.IssueUserAccessTokenRequest$outboundSchema.parse(value),
+    (value) => operations.UpdateCustomerUserRequest$outboundSchema.parse(value),
     "Input validation failed",
   );
   if (!parsed.ok) {
     return [parsed, { status: "invalid" }];
   }
   const payload = parsed.value;
-  const body = null;
+  const body = encodeJSON("body", payload.data, { explode: true });
 
-  const path = encodePath(
-    "/users/{id}/token",
-    { id: payload.id },
-    { explode: false, charEncoding: "percent" },
-  ) || "";
-
+  const path = `/commerce/customers/${payload.customerId}/users/${payload.userId}`;
   const headers = new Headers({
-    Accept: "application/json",
+    "Content-Type": "application/json",
+    Accept: "application/hal+json",
   });
 
   const securityInput = await extractSecurity(client._options.security);
@@ -97,7 +86,7 @@ async function $do(
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
-    operationID: "users.issueToken",
+    operationID: "customer.users.update",
     oAuth2Scopes: null,
     resolvedSecurity: requestSecurity,
     securitySource: client._options.security,
@@ -119,7 +108,7 @@ async function $do(
 
   const requestRes = client._createRequest(context, {
     security: requestSecurity,
-    method: "GET",
+    method: "PATCH",
     baseURL: options?.serverURL,
     path,
     headers,
@@ -148,7 +137,7 @@ async function $do(
   };
 
   const [result] = await M.match<
-    operations.IssueUserAccessTokenResponse,
+    operations.UpdateCustomerUserResponse,
     | errors.ErrorResponse
     | errors.OminityDefaultError
     | ResponseValidationError
@@ -159,7 +148,7 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, IssueUserAccessTokenResponse$inboundSchema, {
+    M.json(200, operations.UpdateCustomerUserResponse$inboundSchema, {
       ctype: "application/hal+json",
     }),
     M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {

@@ -4,7 +4,8 @@
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import {
-    encodeSimple,
+    encodeDeepObjectQuery,
+    encodePath,
     encodeFormQuery,
     queryJoin,
 } from "../../lib/encodings.js";
@@ -85,18 +86,24 @@ async function $do(
     const payload = parsed.value;
     const body = null;
 
-    const path = encodeSimple(
+    const path = encodePath(
         "/users/{id}/customers",
         { "id": payload.id },
         { explode: false, charEncoding: "percent" },
     ) || "";
 
     const baseQuery = encodeFormQuery({
+        include: payload.include,
+        sort: payload.sort,
         page: payload.page,
         limit: payload.limit,
     });
 
-    const query = queryJoin(baseQuery);
+    const filterQuery = payload.filter != null
+        ? encodeDeepObjectQuery({ filter: payload.filter })
+        : undefined;
+
+    const query = queryJoin(baseQuery, filterQuery);
 
     const headers = new Headers({
         Accept: "application/hal+json",

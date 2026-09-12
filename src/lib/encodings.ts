@@ -343,6 +343,35 @@ export const encodeSimple = (
   return out.slice(1);
 };
 
+/**
+ * Replaces named placeholders in an API path with URL-encoded values.
+ *
+ * OpenAPI's `simple` encoder serializes one parameter value; it does not
+ * expand a complete path template. Generated operations should use this
+ * helper for paths such as `/users/{id}/customers`.
+ */
+export function encodePath(
+  template: string,
+  parameters: Readonly<Record<string, unknown>>,
+  options?: { explode?: boolean; charEncoding?: "percent" | "none" },
+): string {
+  const encodeString = (value: string) => {
+    return options?.charEncoding === "none" ? value : encodeURIComponent(value);
+  };
+
+  return template.replace(/\{([^{}]+)\}/g, (_placeholder, name: string) => {
+    const value = parameters[name];
+    if (value == null) {
+      throw new EncodingError(`Missing value for path parameter '${name}'.`);
+    }
+    if (Array.isArray(value) || isPlainObject(value)) {
+      throw new EncodingError(`Path parameter '${name}' must be a scalar value.`);
+    }
+
+    return encodeString(serializeValue(value));
+  });
+}
+
 function explode(key: string, value: unknown): [string, unknown][] {
   if (Array.isArray(value)) {
     return value.map((v) => [key, v]);

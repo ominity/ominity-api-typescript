@@ -4,7 +4,7 @@
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import {
-    encodeSimple,
+    encodePath,
 } from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
@@ -82,7 +82,7 @@ async function $do(
     const payload = parsed.value;
     const body = null;
 
-    const path = encodeSimple(
+    const path = encodePath(
         "/users/{id}/mfa-methods/{method}",
         { "id": payload.id, "method": payload.method },
         { explode: false, charEncoding: "percent" },

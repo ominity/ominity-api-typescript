@@ -17,6 +17,10 @@ import { ShippingMethods } from "./shipping-methods.js";
 import { ShippingZones } from "./shipping-zones.js";
 import { Reviews } from "./reviews.js";
 import { Currencies } from "./currencies.js";
+import { CustomerUsers } from "./customer-users.js";
+import { CustomerUserInvitations } from "./customer-user-invitations.js";
+import { CustomerUserRoles } from "./customer-user-roles.js";
+import { CustomerUserPermissions } from "./customer-user-permissions.js";
 
 export { CartItems } from "./cart-items.js";
 export { Carts } from "./carts.js";
@@ -32,6 +36,10 @@ export { ShippingMethods } from "./shipping-methods.js";
 export { ShippingZones } from "./shipping-zones.js";
 export { Reviews } from "./reviews.js";
 export { Currencies } from "./currencies.js";
+export { CustomerUsers } from "./customer-users.js";
+export { CustomerUserInvitations } from "./customer-user-invitations.js";
+export { CustomerUserRoles } from "./customer-user-roles.js";
+export { CustomerUserPermissions } from "./customer-user-permissions.js";
 
 export class Commerce extends ClientSDK {
   private _cartItems?: CartItems;
@@ -48,6 +56,10 @@ export class Commerce extends ClientSDK {
   private _shippingZones?: ShippingZones;
   private _reviews?: Reviews;
   private _currencies?: Currencies;
+  private _customerUsers?: CustomerUsers;
+  private _customerUserInvitations?: CustomerUserInvitations;
+  private _customerUserRoles?: CustomerUserRoles;
+  private _customerUserPermissions?: CustomerUserPermissions;
 
   get cartItems(): CartItems {
     return (this._cartItems ??= new CartItems(this._options));
@@ -105,6 +117,22 @@ export class Commerce extends ClientSDK {
     return (this._currencies ??= new Currencies(this._options));
   }
 
+  get customerUsers(): CustomerUsers {
+    return (this._customerUsers ??= new CustomerUsers(this._options));
+  }
+
+  get customerUserInvitations(): CustomerUserInvitations {
+    return (this._customerUserInvitations ??= new CustomerUserInvitations(this._options));
+  }
+
+  get customerUserRoles(): CustomerUserRoles {
+    return (this._customerUserRoles ??= new CustomerUserRoles(this._options));
+  }
+
+  get customerUserPermissions(): CustomerUserPermissions {
+    return (this._customerUserPermissions ??= new CustomerUserPermissions(this._options));
+  }
+
   protected override _propagateLanguage(language: string | undefined): void {
     this._cartItems?.setLanguage(language);
     this._carts?.setLanguage(language);
@@ -120,5 +148,9 @@ export class Commerce extends ClientSDK {
     this._shippingZones?.setLanguage(language);
     this._reviews?.setLanguage(language);
     this._currencies?.setLanguage(language);
+    this._customerUsers?.setLanguage(language);
+    this._customerUserInvitations?.setLanguage(language);
+    this._customerUserRoles?.setLanguage(language);
+    this._customerUserPermissions?.setLanguage(language);
   }
 }

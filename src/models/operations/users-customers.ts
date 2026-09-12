@@ -13,6 +13,22 @@ export type ListUserCustomersRequest = {
      */
     id: number;
     /**
+     * Include related customer or role resources.
+     */
+    include?: string | undefined;
+    /**
+     * Filter by membership, role, or customer fields.
+     */
+    filter?: {
+        id?: number | undefined;
+        role?: number | undefined;
+        customer?: number | undefined;
+    } | undefined;
+    /**
+     * Sort by membership fields.
+     */
+    sort?: string | undefined;
+    /**
      * Page number.
      */
     page?: number | undefined;
@@ -29,6 +45,13 @@ export const ListUserCustomersRequest$outboundSchema: z.ZodType<
     ListUserCustomersRequest
 > = z.object({
     id: z.number(),
+    include: z.string().optional(),
+    filter: z.object({
+        id: z.number().int().optional(),
+        role: z.number().int().optional(),
+        customer: z.number().int().optional(),
+    }).optional(),
+    sort: z.string().optional(),
     page: z.number().optional(),
     limit: z.number().optional(),
 });
@@ -49,3 +72,21 @@ export const ListUserCustomersResponse$inboundSchema: z.ZodType<
         v._links,
     )
 );
+
+export type GetUserCustomerRequest = {
+    userId: number;
+    customerId: number;
+    include?: string | undefined;
+};
+
+export type GetUserCustomerResponse = CustomerUser;
+
+/** @internal */
+export const GetUserCustomerRequest$outboundSchema: z.ZodType<GetUserCustomerRequest> = z.object({
+    userId: z.number().int(),
+    customerId: z.number().int(),
+    include: z.string().optional(),
+});
+
+/** @internal */
+export const GetUserCustomerResponse$inboundSchema: z.ZodType<GetUserCustomerResponse> = CustomerUser$inboundSchema;

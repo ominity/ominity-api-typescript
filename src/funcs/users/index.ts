@@ -10,6 +10,7 @@ export * from "./usersUpdate.js";
 export * from "./usersSendPasswordResetLink.js";
 export * from "./usersResetPassword.js";
 export * from "./usersListCustomers.js";
+export * from "./usersGetCustomer.js";
 export * from "./usersListOAuthAccounts.js";
 export * from "./usersListMfaMethods.js";
 export * from "./usersGetMfaMethod.js";

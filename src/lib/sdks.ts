@@ -121,6 +121,21 @@ export class ClientSDK {
 
   protected _propagateLanguage(_language: string | undefined): void {}
 
+  private hookContext(context: HookContext): HookContext {
+    const operationOptions = typeof context.options === "object"
+      && context.options !== null
+      ? context.options
+      : {};
+
+    return {
+      ...context,
+      options: {
+        ...this._options,
+        ...operationOptions,
+      },
+    };
+  }
+
   public _createRequest(
     context: HookContext,
     conf: RequestConfig,
@@ -212,7 +227,7 @@ export class ClientSDK {
 
     let input;
     try {
-      input = this.#hooks.beforeCreateRequest(context, {
+      input = this.#hooks.beforeCreateRequest(this.hookContext(context), {
         url: reqURL,
         options: {
           ...fetchOptions,
@@ -249,7 +264,8 @@ export class ClientSDK {
       | UnexpectedClientError
     >
   > {
-    const { context, errorCodes } = options;
+    const { errorCodes } = options;
+    const context = this.hookContext(options.context);
 
     return retry(
       async () => {

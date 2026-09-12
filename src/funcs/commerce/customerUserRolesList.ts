@@ -1,11 +1,9 @@
 /*
- * Issue user access token.
+ * List customer user roles.
  */
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
-import {
-  encodePath,
-} from "../../lib/encodings.js";
+import { encodeFormQuery } from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
 import { extractSecurity, resolveGlobalSecurity } from "../../lib/security.js";
@@ -20,17 +18,17 @@ import {
   UnexpectedClientError,
 } from "../../models/errors/http-client-errors.js";
 import * as operations from "../../models/operations/index.js";
-import { IssueUserAccessTokenResponse$inboundSchema } from "../../models/operations/users.js";
+import { applyPaginationParams } from "../../models/pagination.js";
 import { APICall, APIPromise } from "../../types/async.js";
-import { Result } from "../../types/fp.js";
+import { OK, Result } from "../../types/fp.js";
 
-export function usersIssueToken(
+export function customerUserRolesList(
   client: ClientSDK,
-  request: operations.IssueUserAccessTokenRequest,
+  request: operations.ListCustomerUserRolesRequest = {},
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.IssueUserAccessTokenResponse,
+    operations.ListCustomerUserRolesResponse,
     | errors.ErrorResponse
     | errors.OminityDefaultError
     | ResponseValidationError
@@ -42,21 +40,17 @@ export function usersIssueToken(
     | SDKValidationError
   >
 > {
-  return new APIPromise($do(
-    client,
-    request,
-    options,
-  ));
+  return new APIPromise($do(client, request, options));
 }
 
 async function $do(
   client: ClientSDK,
-  request: operations.IssueUserAccessTokenRequest,
+  request: operations.ListCustomerUserRolesRequest = {},
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      operations.IssueUserAccessTokenResponse,
+      operations.ListCustomerUserRolesResponse,
       | errors.ErrorResponse
       | errors.OminityDefaultError
       | ResponseValidationError
@@ -72,7 +66,7 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) => operations.IssueUserAccessTokenRequest$outboundSchema.parse(value),
+    (value) => operations.ListCustomerUserRolesRequest$outboundSchema.parse(value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -81,15 +75,13 @@ async function $do(
   const payload = parsed.value;
   const body = null;
 
-  const path = encodePath(
-    "/users/{id}/token",
-    { id: payload.id },
-    { explode: false, charEncoding: "percent" },
-  ) || "";
-
-  const headers = new Headers({
-    Accept: "application/json",
+  const path = "/commerce/customers/users/roles";
+  const query = encodeFormQuery({
+    page: payload.page,
+    limit: payload.limit,
   });
+
+  const headers = new Headers({ Accept: "application/hal+json" });
 
   const securityInput = await extractSecurity(client._options.security);
   const requestSecurity = resolveGlobalSecurity(securityInput);
@@ -97,7 +89,7 @@ async function $do(
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
-    operationID: "users.issueToken",
+    operationID: "customer.user.roles.list",
     oAuth2Scopes: null,
     resolvedSecurity: requestSecurity,
     securitySource: client._options.security,
@@ -123,6 +115,7 @@ async function $do(
     baseURL: options?.serverURL,
     path,
     headers,
+    query,
     body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
@@ -148,7 +141,7 @@ async function $do(
   };
 
   const [result] = await M.match<
-    operations.IssueUserAccessTokenResponse,
+    operations.ListCustomerUserRolesResponse,
     | errors.ErrorResponse
     | errors.OminityDefaultError
     | ResponseValidationError
@@ -159,7 +152,7 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, IssueUserAccessTokenResponse$inboundSchema, {
+    M.json(200, operations.ListCustomerUserRolesResponse$inboundSchema, {
       ctype: "application/hal+json",
     }),
     M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
@@ -171,5 +164,6 @@ async function $do(
     return [result, { status: "complete", request: req, response }];
   }
 
-  return [result, { status: "complete", request: req, response }];
+  return [OK(applyPaginationParams(result.value, payload)), { status: "complete", request: req, response }];
 }
+

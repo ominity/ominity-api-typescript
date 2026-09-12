@@ -4,7 +4,7 @@
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import {
-    encodeSimple,
+    encodePath,
     encodeFormQuery,
     queryJoin,
 } from "../../lib/encodings.js";
@@ -84,7 +84,7 @@ async function $do(
     const payload = parsed.value;
     const body = null;
 
-    const path = encodeSimple(
+    const path = encodePath(
         "/users/{id}/recovery-codes",
         { "id": payload.id },
         { explode: false, charEncoding: "percent" },

@@ -21,3 +21,8 @@ export * from "./shipping-method.js";
 export * from "./shipping-zone.js";
 export * from "./review.js";
 export * from "./currency.js";
+export * from "./customer-user.js";
+export * from "./customer-user-invitation.js";
+export * from "./customer.js";
+export * from "./customer-user-role.js";
+export * from "./customer-user-permission.js";

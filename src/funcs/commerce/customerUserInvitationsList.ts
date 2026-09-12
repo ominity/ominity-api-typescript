@@ -1,13 +1,11 @@
 /*
- * Issue user access token.
+ * List customer user invitations.
  */
 
-import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
-import {
-  encodePath,
-} from "../../lib/encodings.js";
+import { encodeDeepObjectQuery, encodeFormQuery, queryJoin } from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
+import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import { extractSecurity, resolveGlobalSecurity } from "../../lib/security.js";
 import * as errors from "../../models/errors/index.js";
 import { ResponseValidationError } from "../../models/errors/response-validation-error.js";
@@ -20,17 +18,36 @@ import {
   UnexpectedClientError,
 } from "../../models/errors/http-client-errors.js";
 import * as operations from "../../models/operations/index.js";
-import { IssueUserAccessTokenResponse$inboundSchema } from "../../models/operations/users.js";
+import { applyPaginationParams } from "../../models/pagination.js";
 import { APICall, APIPromise } from "../../types/async.js";
-import { Result } from "../../types/fp.js";
+import { OK, Result } from "../../types/fp.js";
 
-export function usersIssueToken(
+export function customerUserInvitationsList(
   client: ClientSDK,
-  request: operations.IssueUserAccessTokenRequest,
+  request: operations.ListCustomerUserInvitationsRequest,
   options?: RequestOptions,
-): APIPromise<
+): APIPromise<Result<
+  operations.ListCustomerUserInvitationsResponse,
+  | errors.ErrorResponse
+  | errors.OminityDefaultError
+  | ResponseValidationError
+  | ConnectionError
+  | RequestAbortedError
+  | RequestTimeoutError
+  | InvalidRequestError
+  | UnexpectedClientError
+  | SDKValidationError
+>> {
+  return new APIPromise($do(client, request, options));
+}
+
+async function $do(
+  client: ClientSDK,
+  request: operations.ListCustomerUserInvitationsRequest,
+  options?: RequestOptions,
+): Promise<[
   Result<
-    operations.IssueUserAccessTokenResponse,
+    operations.ListCustomerUserInvitationsResponse,
     | errors.ErrorResponse
     | errors.OminityDefaultError
     | ResponseValidationError
@@ -40,89 +57,59 @@ export function usersIssueToken(
     | InvalidRequestError
     | UnexpectedClientError
     | SDKValidationError
-  >
-> {
-  return new APIPromise($do(
-    client,
-    request,
-    options,
-  ));
-}
-
-async function $do(
-  client: ClientSDK,
-  request: operations.IssueUserAccessTokenRequest,
-  options?: RequestOptions,
-): Promise<
-  [
-    Result<
-      operations.IssueUserAccessTokenResponse,
-      | errors.ErrorResponse
-      | errors.OminityDefaultError
-      | ResponseValidationError
-      | ConnectionError
-      | RequestAbortedError
-      | RequestTimeoutError
-      | InvalidRequestError
-      | UnexpectedClientError
-      | SDKValidationError
-    >,
-    APICall,
-  ]
-> {
+  >,
+  APICall,
+]> {
   const parsed = safeParse(
     request,
-    (value) => operations.IssueUserAccessTokenRequest$outboundSchema.parse(value),
+    (value) => operations.ListCustomerUserInvitationsRequest$outboundSchema.parse(value),
     "Input validation failed",
   );
   if (!parsed.ok) {
     return [parsed, { status: "invalid" }];
   }
+
   const payload = parsed.value;
   const body = null;
-
-  const path = encodePath(
-    "/users/{id}/token",
-    { id: payload.id },
-    { explode: false, charEncoding: "percent" },
-  ) || "";
-
-  const headers = new Headers({
-    Accept: "application/json",
+  const path = `/commerce/customers/${payload.customerId}/users/invitations`;
+  const baseQuery = encodeFormQuery({
+    sort: payload.sort,
+    page: payload.page,
+    limit: payload.limit,
   });
-
+  const filterQuery = payload.filter != null
+    ? encodeDeepObjectQuery({ filter: payload.filter })
+    : undefined;
+  const query = queryJoin(baseQuery, filterQuery);
+  const headers = new Headers({ Accept: "application/hal+json" });
   const securityInput = await extractSecurity(client._options.security);
   const requestSecurity = resolveGlobalSecurity(securityInput);
-
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
-    operationID: "users.issueToken",
+    operationID: "customer.userInvitations.list",
     oAuth2Scopes: null,
     resolvedSecurity: requestSecurity,
     securitySource: client._options.security,
-    retryConfig: options?.retries
-      || client._options.retryConfig
-      || {
-        strategy: "backoff",
-        backoff: {
-          initialInterval: 500,
-          maxInterval: 5000,
-          exponent: 2,
-          maxElapsedTime: 7500,
-        },
-        retryConnectionErrors: true,
-      }
-      || { strategy: "none" },
+    retryConfig: options?.retries || client._options.retryConfig || {
+      strategy: "backoff" as const,
+      backoff: {
+        initialInterval: 500,
+        maxInterval: 5000,
+        exponent: 2,
+        maxElapsedTime: 7500,
+      },
+      retryConnectionErrors: true,
+    },
     retryCodes: options?.retryCodes || ["5xx"],
   };
-
   const requestRes = client._createRequest(context, {
     security: requestSecurity,
     method: "GET",
     baseURL: options?.serverURL,
     path,
     headers,
+    query,
     body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
@@ -130,8 +117,8 @@ async function $do(
   if (!requestRes.ok) {
     return [requestRes, { status: "invalid" }];
   }
-  const req = requestRes.value;
 
+  const req = requestRes.value;
   const doResult = await client._do(req, {
     context,
     errorCodes: ["400", "4XX", "5XX"],
@@ -141,14 +128,11 @@ async function $do(
   if (!doResult.ok) {
     return [doResult, { status: "request-error", request: req }];
   }
+
   const response = doResult.value;
-
-  const responseFields = {
-    HttpMeta: { Response: response, Request: req },
-  };
-
+  const responseFields = { HttpMeta: { Response: response, Request: req } };
   const [result] = await M.match<
-    operations.IssueUserAccessTokenResponse,
+    operations.ListCustomerUserInvitationsResponse,
     | errors.ErrorResponse
     | errors.OminityDefaultError
     | ResponseValidationError
@@ -159,7 +143,7 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, IssueUserAccessTokenResponse$inboundSchema, {
+    M.json(200, operations.ListCustomerUserInvitationsResponse$inboundSchema, {
       ctype: "application/hal+json",
     }),
     M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
@@ -171,5 +155,9 @@ async function $do(
     return [result, { status: "complete", request: req, response }];
   }
 
-  return [result, { status: "complete", request: req, response }];
+  return [OK(applyPaginationParams(result.value, payload)), {
+    status: "complete",
+    request: req,
+    response,
+  }];
 }

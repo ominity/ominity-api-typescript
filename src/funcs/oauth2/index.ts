@@ -3,7 +3,7 @@
  */
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
-import { encodeJSON, encodeSimple } from "../../lib/encodings.js";
+import { encodeJSON, encodePath } from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
 import { safeParse } from "../../lib/schemas.js";
 import { baseURLWithoutAPIVersion } from "../../lib/url.js";
@@ -272,7 +272,7 @@ export async function oauth2RevokeAuthorizedToken(
     return parsed;
   }
 
-  const path = encodeSimple(
+  const path = encodePath(
     "/oauth2/tokens/{token_id}",
     { token_id: parsed.value.token_id },
     { explode: false, charEncoding: "percent" },
@@ -428,7 +428,7 @@ export async function oauth2UpdateClient(
     redirect: parsed.value.redirect,
   }, { explode: true });
 
-  const path = encodeSimple(
+  const path = encodePath(
     "/oauth2/clients/{client_id}",
     { client_id: parsed.value.client_id },
     { explode: false, charEncoding: "percent" },
@@ -483,7 +483,7 @@ export async function oauth2DeleteClient(
     return parsed;
   }
 
-  const path = encodeSimple(
+  const path = encodePath(
     "/oauth2/clients/{client_id}",
     { client_id: parsed.value.client_id },
     { explode: false, charEncoding: "percent" },
@@ -689,7 +689,7 @@ export async function oauth2DeletePersonalAccessToken(
     return parsed;
   }
 
-  const path = encodeSimple(
+  const path = encodePath(
     "/oauth2/personal-access-tokens/{token_id}",
     { token_id: parsed.value.token_id },
     { explode: false, charEncoding: "percent" },
