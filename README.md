@@ -2,9 +2,6 @@
 
 Developer-friendly & type-safe Typescript SDK specifically catered to leverage *@ominity/api-typescript* API.
 
-> [!IMPORTANT]
-> This SDK is under active development and not yet ready for production use.
-
 <!-- Start Summary [summary] -->
 ## Summary
 
