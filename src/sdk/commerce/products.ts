@@ -5,6 +5,7 @@
 import { productsList } from "../../funcs/commerce/productsList.js";
 import { productsGet } from "../../funcs/commerce/productsGet.js";
 import { productsOffersList } from "../../funcs/commerce/productsOffersList.js";
+import { productsOfferGet } from "../../funcs/commerce/productsOfferGet.js";
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import * as operations from "../../models/operations/index.js";
 import { unwrapAsync } from "../../types/fp.js";
@@ -29,5 +30,9 @@ export class Products extends ClientSDK {
     options?: RequestOptions,
   ): Promise<operations.ListProductOffersResponse> {
     return unwrapAsync(productsOffersList(this, request, options));
+  }
+
+  async getOffer(request: operations.GetProductOfferRequest, options?: RequestOptions): Promise<operations.GetProductOfferResponse> {
+    return unwrapAsync(productsOfferGet(this, request, options));
   }
 }

@@ -7,6 +7,7 @@ import { ordersCreate } from "../../funcs/commerce/ordersCreate.js";
 import { ordersGet } from "../../funcs/commerce/ordersGet.js";
 import { ordersUpdate } from "../../funcs/commerce/ordersUpdate.js";
 import { ordersPaymentsList } from "../../funcs/commerce/ordersPaymentsList.js";
+import { orderPaymentsCreate, orderPaymentsGet } from "../../funcs/commerce/paymentsMutations.js";
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import * as operations from "../../models/operations/index.js";
 import { unwrapAsync } from "../../types/fp.js";
@@ -82,5 +83,13 @@ export class Orders extends ClientSDK {
             { ...request, orderId },
             options,
         ));
+    }
+
+    async createPayment(request: operations.CreateOrderPaymentRequest, options?: RequestOptions): Promise<operations.CreateOrderPaymentResponse> {
+        return unwrapAsync(orderPaymentsCreate(this, request, options));
+    }
+
+    async getPayment(request: operations.GetOrderPaymentRequest, options?: RequestOptions): Promise<operations.GetOrderPaymentResponse> {
+        return unwrapAsync(orderPaymentsGet(this, request, options));
     }
 }

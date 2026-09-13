@@ -26,3 +26,7 @@ export * from "./customer-user-invitation.js";
 export * from "./customer.js";
 export * from "./customer-user-role.js";
 export * from "./customer-user-permission.js";
+export * from "./customer-group.js";
+export * from "./mandate.js";
+export * from "./subscription.js";
+export * from "./shipping-class.js";

@@ -1,0 +1,25 @@
+import * as z from "zod/v4";
+import { Order, Order$inboundSchema } from "../commerce/order.js";
+import { Paginated } from "../pagination.js";
+import { ListRequest, ListRequest$outboundSchema, paginatedSchema } from "./helpers.js";
+
+export type ListCustomerOrdersRequest = ListRequest & { customerId: number };
+export type ListCustomerOrdersResponse = Paginated<Order>;
+export const ListCustomerOrdersRequest$outboundSchema: z.ZodType<ListCustomerOrdersRequest> = ListRequest$outboundSchema.extend({ customerId: z.number().int() });
+export const ListCustomerOrdersResponse$inboundSchema = paginatedSchema("orders", Order$inboundSchema);
+export type GetCustomerOrderRequest = { customerId: number; id: number; include?: string | undefined };
+export type GetCustomerOrderResponse = Order;
+export const GetCustomerOrderRequest$outboundSchema: z.ZodType<GetCustomerOrderRequest> = z.object({ customerId: z.number().int(), id: z.number().int(), include: z.string().optional() });
+export const GetCustomerOrderResponse$inboundSchema = Order$inboundSchema;
+export type CreateCustomerOrderRequest = { customerId: number; data: Record<string, unknown> };
+export type CreateCustomerOrderResponse = Order;
+export const CreateCustomerOrderRequest$outboundSchema: z.ZodType<CreateCustomerOrderRequest> = z.object({ customerId: z.number().int(), data: z.record(z.string(), z.unknown()) });
+export const CreateCustomerOrderResponse$inboundSchema = Order$inboundSchema;
+export type UpdateCustomerOrderRequest = { customerId: number; id: number; data: Record<string, unknown> };
+export type UpdateCustomerOrderResponse = Order;
+export const UpdateCustomerOrderRequest$outboundSchema: z.ZodType<UpdateCustomerOrderRequest> = z.object({ customerId: z.number().int(), id: z.number().int(), data: z.record(z.string(), z.unknown()) });
+export const UpdateCustomerOrderResponse$inboundSchema = Order$inboundSchema;
+export type DeleteCustomerOrderRequest = { customerId: number; id: number };
+export type DeleteCustomerOrderResponse = void;
+export const DeleteCustomerOrderRequest$outboundSchema: z.ZodType<DeleteCustomerOrderRequest> = z.object({ customerId: z.number().int(), id: z.number().int() });
+export const DeleteCustomerOrderResponse$inboundSchema: z.ZodType<void> = z.void();

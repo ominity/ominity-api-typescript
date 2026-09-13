@@ -9,6 +9,7 @@ import { ContentTypes } from "./content-types.js";
 import { Layouts } from "./layouts.js";
 import { Pages } from "./pages.js";
 import { Menus } from "./menus.js";
+import { Routes } from "./routes.js";
 
 export { Components } from "./components.js";
 export { Content } from "./content.js";
@@ -16,6 +17,7 @@ export { ContentTypes } from "./content-types.js";
 export { Layouts } from "./layouts.js";
 export { Pages } from "./pages.js";
 export { Menus } from "./menus.js";
+export { Routes } from "./routes.js";
 
 export class Cms extends ClientSDK {
     private _components?: Components;
@@ -24,6 +26,7 @@ export class Cms extends ClientSDK {
     private _layouts?: Layouts;
     private _pages?: Pages;
     private _menus?: Menus;
+    private _routes?: Routes;
 
     get components(): Components {
         return (this._components ??= new Components(this._options));
@@ -49,6 +52,8 @@ export class Cms extends ClientSDK {
         return (this._menus ??= new Menus(this._options));
     }
 
+    get routes(): Routes { return (this._routes ??= new Routes(this._options)); }
+
     protected override _propagateLanguage(language: string | undefined): void {
         this._components?.setLanguage(language);
         this._content?.setLanguage(language);
@@ -56,5 +61,6 @@ export class Cms extends ClientSDK {
         this._layouts?.setLanguage(language);
         this._pages?.setLanguage(language);
         this._menus?.setLanguage(language);
+        this._routes?.setLanguage(language);
     }
 }

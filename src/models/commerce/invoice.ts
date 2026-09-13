@@ -23,12 +23,12 @@ export type InvoiceStatus = OpenEnum<typeof InvoiceStatus>;
 export type Invoice = {
     resource: string;
     id: number;
-    customerId: number;
+    customerId: number | null;
     number: string;
     status: InvoiceStatus;
     email: string;
-    companyName: string;
-    companyVat: string;
+    companyName: string | null;
+    companyVat: string | null;
     billingAddress: Address;
     subtotalAmount: CurrencyAmount;
     discountAmount: CurrencyAmount;
@@ -37,9 +37,9 @@ export type Invoice = {
     amountPaid: CurrencyAmount;
     isTaxExempt: boolean;
     notes: string;
-    invoicedAt: string;
-    dueAt: string;
-    paidAt: string;
+    invoicedAt: string | null;
+    dueAt: string | null;
+    paidAt: string | null;
     updatedAt: string;
     createdAt: string;
     links?: HalLinks;
@@ -53,12 +53,12 @@ export const InvoiceStatus$inboundSchema: z.ZodType<InvoiceStatus, unknown> = op
 export const Invoice$inboundSchema: z.ZodType<Invoice> = z.object({
     resource: z.string(),
     id: z.number(),
-    customerId: z.number(),
+    customerId: z.number().nullable(),
     number: z.string(),
     status: InvoiceStatus$inboundSchema,
     email: z.string(),
-    companyName: z.string(),
-    companyVat: z.string(),
+    companyName: z.string().nullable(),
+    companyVat: z.string().nullable(),
     billingAddress: Address$inboundSchema,
     subtotalAmount: CurrencyAmount$inboundSchema,
     discountAmount: CurrencyAmount$inboundSchema,
@@ -67,9 +67,9 @@ export const Invoice$inboundSchema: z.ZodType<Invoice> = z.object({
     amountPaid: CurrencyAmount$inboundSchema,
     isTaxExempt: z.boolean(),
     notes: z.string(),
-    invoicedAt: z.string(),
-    dueAt: z.string(),
-    paidAt: z.string(),
+    invoicedAt: z.string().nullable(),
+    dueAt: z.string().nullable(),
+    paidAt: z.string().nullable(),
     updatedAt: z.string(),
     createdAt: z.string(),
     _links: HalLinks$inboundSchema.optional(),

@@ -12,5 +12,8 @@ export * from "./layoutsGet.js";
 export * from "./pagesList.js";
 export * from "./pagesGet.js";
 export * from "./pagesComponentsList.js";
+export * from "./componentFields.js";
+export * from "./pageComponents.js";
+export * from "./routes.js";
 export * from "./menusList.js";
 export * from "./menusGet.js";

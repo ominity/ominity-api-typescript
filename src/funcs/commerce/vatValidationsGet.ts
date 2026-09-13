@@ -44,7 +44,7 @@ async function $do(
         | RequestTimeoutError
     >
 > {
-    const path = pathToFunc("/commerce/vat-validations/{number}")({
+    const path = pathToFunc("/commerce/vatvalidations/{number}")({
         number: request.vatNumber,
     });
 
@@ -118,4 +118,3 @@ async function $do(
 
     return result;
 }
-

@@ -10,13 +10,15 @@ import { CurrencyAmount, CurrencyAmount$inboundSchema } from "../common/amount.j
 export type Payment = {
     resource: string;
     id: number;
-    customerId: number;
+    customerId: number | null;
     paymentmethodId: number;
     status: string;
     type: string;
     amount: CurrencyAmount;
     description: string;
-    invoiceId: number | null;
+    invoiceId?: number;
+    mandateId?: number;
+    details?: Record<string, unknown>;
     expiresAt: string | null;
     completedAt: string | null;
     updatedAt: string;
@@ -28,13 +30,15 @@ export type Payment = {
 export const Payment$inboundSchema: z.ZodType<Payment> = z.object({
     resource: z.string(),
     id: z.number(),
-    customerId: z.number(),
+    customerId: z.number().nullable(),
     paymentmethodId: z.number(),
     status: z.string(),
     type: z.string(),
     amount: CurrencyAmount$inboundSchema,
     description: z.string(),
-    invoiceId: z.nullable(z.number()),
+    invoiceId: z.number().optional(),
+    mandateId: z.number().optional(),
+    details: z.record(z.string(), z.unknown()).optional(),
     expiresAt: z.string().nullable(),
     completedAt: z.string().nullable(),
     updatedAt: z.string(),

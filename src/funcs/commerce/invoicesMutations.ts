@@ -1,0 +1,7 @@
+import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
+import { executeOperation } from "../../lib/operation.js";
+import * as operations from "../../models/operations/index.js";
+
+export const invoicesCreate = (client: ClientSDK, request: operations.CreateInvoiceRequest, options?: RequestOptions) => executeOperation(client, request, { operationID: "commerce.invoices.create", method: "POST", path: () => "/commerce/invoices", requestSchema: operations.CreateInvoiceRequest$outboundSchema, responseSchema: operations.CreateInvoiceResponse$inboundSchema, body: (v) => v.data }, options);
+export const invoicesUpdate = (client: ClientSDK, request: operations.UpdateInvoiceRequest, options?: RequestOptions) => executeOperation(client, request, { operationID: "commerce.invoices.update", method: "PATCH", path: (v) => `/commerce/invoices/${v.id}`, requestSchema: operations.UpdateInvoiceRequest$outboundSchema, responseSchema: operations.UpdateInvoiceResponse$inboundSchema, body: (v) => v.data }, options);
+export const invoicesDownloadPdf = (client: ClientSDK, request: operations.DownloadInvoicePdfRequest, options?: RequestOptions) => executeOperation(client, request, { operationID: "commerce.invoices.downloadPdf", method: "GET", path: (v) => `/commerce/invoices/${v.id}/pdf`, requestSchema: operations.DownloadInvoicePdfRequest$outboundSchema, responseSchema: operations.DownloadInvoicePdfResponse$inboundSchema, responseType: "bytes" }, options);

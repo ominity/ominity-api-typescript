@@ -46,7 +46,7 @@ async function $do(
         | RequestTimeoutError
     >
 > {
-    const path = pathToFunc("/commerce/subscription-intervals/{id}")({
+    const path = pathToFunc("/commerce/subscriptions/intervals/{id}")({
         id: request.id,
     });
 
@@ -127,4 +127,3 @@ async function $do(
 
     return result;
 }
-

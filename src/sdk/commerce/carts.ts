@@ -6,6 +6,7 @@ import { cartsList } from "../../funcs/commerce/cartsList.js";
 import { cartsCreate } from "../../funcs/commerce/cartsCreate.js";
 import { cartsGet } from "../../funcs/commerce/cartsGet.js";
 import { cartsUpdate } from "../../funcs/commerce/cartsUpdate.js";
+import { cartShippingMethodsList } from "../../funcs/commerce/cartShippingMethods.js";
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import * as operations from "../../models/operations/index.js";
 import { unwrapAsync } from "../../types/fp.js";
@@ -66,5 +67,9 @@ export class Carts extends ClientSDK {
       { id, data },
       options,
     ));
+  }
+
+  async listShippingMethods(request: operations.ListCartShippingMethodsRequest, options?: RequestOptions): Promise<operations.ListCartShippingMethodsResponse> {
+    return unwrapAsync(cartShippingMethodsList(this, request, options));
   }
 }

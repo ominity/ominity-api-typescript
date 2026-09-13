@@ -6,6 +6,8 @@ import * as z from "zod/v4";
 import { buildPaginated, Paginated } from "../pagination.js";
 import { Cart, Cart$inboundSchema } from "../commerce/cart.js";
 import { HalLinks$inboundSchema } from "../hal.js";
+import { ShippingMethod, ShippingMethod$inboundSchema } from "../commerce/shipping-method.js";
+import { ShippingZone, ShippingZone$inboundSchema } from "../commerce/shipping-zone.js";
 
 export type ListCartsRequest = {
   /**
@@ -107,3 +109,15 @@ export const UpdateCartRequest$outboundSchema: z.ZodType<UpdateCartRequest> = z.
 });
 /** @internal */
 export const UpdateCartResponse$inboundSchema: z.ZodType<UpdateCartResponse> = Cart$inboundSchema;
+
+export type ListCartShippingMethodsRequest = { cartId: string };
+export type ListCartShippingMethodsResponse = Paginated<ShippingMethod> & { shippingZone?: ShippingZone };
+export const ListCartShippingMethodsRequest$outboundSchema: z.ZodType<ListCartShippingMethodsRequest> = z.object({ cartId: z.string() });
+export const ListCartShippingMethodsResponse$inboundSchema: z.ZodType<ListCartShippingMethodsResponse> = z.object({
+  _embedded: z.object({ shipping_methods: z.array(ShippingMethod$inboundSchema), shipping_zone: ShippingZone$inboundSchema.optional() }),
+  count: z.number(),
+  _links: HalLinks$inboundSchema.optional(),
+}).transform((value) => ({
+  ...buildPaginated(value._embedded.shipping_methods, value.count, value._links),
+  ...(value._embedded.shipping_zone ? { shippingZone: value._embedded.shipping_zone } : {}),
+}));

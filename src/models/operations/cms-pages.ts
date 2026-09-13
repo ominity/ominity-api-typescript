@@ -8,6 +8,7 @@ import { buildPaginated, Paginated } from "../pagination.js";
 import { Page, Page$inboundSchema } from "../cms/page.js";
 import { PageComponent, PageComponent$inboundSchema } from "../cms/page-component.js";
 import { HalLinks$inboundSchema } from "../hal.js";
+import { PageComponentField, PageComponentField$inboundSchema } from "../cms/page-component-field.js";
 
 export type ListPagesRequest = {
     /**
@@ -135,3 +136,13 @@ export const ListPageComponentsResponse$inboundSchema: z.ZodType<
         v._links,
     )
 );
+
+export type GetPageComponentRequest = { pageId: number; id: number };
+export type GetPageComponentResponse = PageComponent;
+export const GetPageComponentRequest$outboundSchema: z.ZodType<GetPageComponentRequest> = z.object({ pageId: z.number().int(), id: z.number().int() });
+export const GetPageComponentResponse$inboundSchema = PageComponent$inboundSchema;
+
+export type GetPageComponentFieldRequest = { pageId: number; pageComponentId: number; id: number };
+export type GetPageComponentFieldResponse = PageComponentField;
+export const GetPageComponentFieldRequest$outboundSchema: z.ZodType<GetPageComponentFieldRequest> = z.object({ pageId: z.number().int(), pageComponentId: z.number().int(), id: z.number().int() });
+export const GetPageComponentFieldResponse$inboundSchema = PageComponentField$inboundSchema;

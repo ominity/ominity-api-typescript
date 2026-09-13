@@ -21,6 +21,15 @@ import { CustomerUsers } from "./customer-users.js";
 import { CustomerUserInvitations } from "./customer-user-invitations.js";
 import { CustomerUserRoles } from "./customer-user-roles.js";
 import { CustomerUserPermissions } from "./customer-user-permissions.js";
+import { Customers } from "./customers.js";
+import { CustomerAddresses } from "./customer-addresses.js";
+import { CustomerGroups } from "./customer-groups.js";
+import { CustomerMandates } from "./customer-mandates.js";
+import { CustomerPayments } from "./customer-payments.js";
+import { CustomerOrders } from "./customer-orders.js";
+import { CustomerInvoices } from "./customer-invoices.js";
+import { CustomerSubscriptions } from "./customer-subscriptions.js";
+import { ShippingClasses } from "./shipping-classes.js";
 
 export { CartItems } from "./cart-items.js";
 export { Carts } from "./carts.js";
@@ -40,6 +49,15 @@ export { CustomerUsers } from "./customer-users.js";
 export { CustomerUserInvitations } from "./customer-user-invitations.js";
 export { CustomerUserRoles } from "./customer-user-roles.js";
 export { CustomerUserPermissions } from "./customer-user-permissions.js";
+export { Customers } from "./customers.js";
+export { CustomerAddresses } from "./customer-addresses.js";
+export { CustomerGroups } from "./customer-groups.js";
+export { CustomerMandates } from "./customer-mandates.js";
+export { CustomerPayments } from "./customer-payments.js";
+export { CustomerOrders } from "./customer-orders.js";
+export { CustomerInvoices } from "./customer-invoices.js";
+export { CustomerSubscriptions } from "./customer-subscriptions.js";
+export { ShippingClasses } from "./shipping-classes.js";
 
 export class Commerce extends ClientSDK {
   private _cartItems?: CartItems;
@@ -60,6 +78,15 @@ export class Commerce extends ClientSDK {
   private _customerUserInvitations?: CustomerUserInvitations;
   private _customerUserRoles?: CustomerUserRoles;
   private _customerUserPermissions?: CustomerUserPermissions;
+  private _customers?: Customers;
+  private _customerAddresses?: CustomerAddresses;
+  private _customerGroups?: CustomerGroups;
+  private _customerMandates?: CustomerMandates;
+  private _customerPayments?: CustomerPayments;
+  private _customerOrders?: CustomerOrders;
+  private _customerInvoices?: CustomerInvoices;
+  private _customerSubscriptions?: CustomerSubscriptions;
+  private _shippingClasses?: ShippingClasses;
 
   get cartItems(): CartItems {
     return (this._cartItems ??= new CartItems(this._options));
@@ -133,6 +160,16 @@ export class Commerce extends ClientSDK {
     return (this._customerUserPermissions ??= new CustomerUserPermissions(this._options));
   }
 
+  get customers(): Customers { return (this._customers ??= new Customers(this._options)); }
+  get customerAddresses(): CustomerAddresses { return (this._customerAddresses ??= new CustomerAddresses(this._options)); }
+  get customerGroups(): CustomerGroups { return (this._customerGroups ??= new CustomerGroups(this._options)); }
+  get customerMandates(): CustomerMandates { return (this._customerMandates ??= new CustomerMandates(this._options)); }
+  get customerPayments(): CustomerPayments { return (this._customerPayments ??= new CustomerPayments(this._options)); }
+  get customerOrders(): CustomerOrders { return (this._customerOrders ??= new CustomerOrders(this._options)); }
+  get customerInvoices(): CustomerInvoices { return (this._customerInvoices ??= new CustomerInvoices(this._options)); }
+  get customerSubscriptions(): CustomerSubscriptions { return (this._customerSubscriptions ??= new CustomerSubscriptions(this._options)); }
+  get shippingClasses(): ShippingClasses { return (this._shippingClasses ??= new ShippingClasses(this._options)); }
+
   protected override _propagateLanguage(language: string | undefined): void {
     this._cartItems?.setLanguage(language);
     this._carts?.setLanguage(language);
@@ -152,5 +189,14 @@ export class Commerce extends ClientSDK {
     this._customerUserInvitations?.setLanguage(language);
     this._customerUserRoles?.setLanguage(language);
     this._customerUserPermissions?.setLanguage(language);
+    this._customers?.setLanguage(language);
+    this._customerAddresses?.setLanguage(language);
+    this._customerGroups?.setLanguage(language);
+    this._customerMandates?.setLanguage(language);
+    this._customerPayments?.setLanguage(language);
+    this._customerOrders?.setLanguage(language);
+    this._customerInvoices?.setLanguage(language);
+    this._customerSubscriptions?.setLanguage(language);
+    this._shippingClasses?.setLanguage(language);
   }
 }

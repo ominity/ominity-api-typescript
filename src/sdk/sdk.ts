@@ -11,6 +11,8 @@ import { Settings } from "./settings/index.js";
 import { Users } from "./users/index.js";
 import { Admins } from "./admins.js";
 import { Tracking } from "./tracking/index.js";
+import { MediaLibrary } from "./media-library.js";
+import { Translations } from "./translations.js";
 import type { SDKOptions } from "../lib/config.js";
 import type {
   OminityModuleInput,
@@ -97,6 +99,16 @@ export class Ominity extends ClientSDK {
     return (this._admins ??= new Admins(this._options));
   }
 
+  private _mediaLibrary?: MediaLibrary;
+  get mediaLibrary(): MediaLibrary {
+    return (this._mediaLibrary ??= new MediaLibrary(this._options));
+  }
+
+  private _translations?: Translations;
+  get translations(): Translations {
+    return (this._translations ??= new Translations(this._options));
+  }
+
   protected override _propagateLanguage(language: string | undefined): void {
     this._commerce?.setLanguage(language);
     this._cms?.setLanguage(language);
@@ -108,5 +120,7 @@ export class Ominity extends ClientSDK {
     this._me?.setLanguage(language);
     this._users?.setLanguage(language);
     this._admins?.setLanguage(language);
+    this._mediaLibrary?.setLanguage(language);
+    this._translations?.setLanguage(language);
   }
 }

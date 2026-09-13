@@ -6,6 +6,7 @@ import * as z from "zod/v4";
 import { buildPaginated, Paginated } from "../pagination.js";
 import { Payment, Payment$inboundSchema } from "../commerce/payment.js";
 import { HalLinks$inboundSchema } from "../hal.js";
+import { PaymentInput, PaymentInput$outboundSchema } from "./commerce-customer-payments.js";
 
 export type ListOrderPaymentsRequest = {
     /**
@@ -134,3 +135,24 @@ export const GetPaymentRequest$outboundSchema: z.ZodType<
 export const GetPaymentResponse$inboundSchema: z.ZodType<
     GetPaymentResponse
 > = Payment$inboundSchema;
+
+export type CreatePaymentRequest = { include?: string | undefined; data: PaymentInput };
+export type CreatePaymentResponse = Payment;
+export const CreatePaymentRequest$outboundSchema: z.ZodType<CreatePaymentRequest> = z.object({ include: z.string().optional(), data: PaymentInput$outboundSchema });
+export const CreatePaymentResponse$inboundSchema = Payment$inboundSchema;
+
+export type CreateOrderPaymentRequest = {
+    orderId: string;
+    data: Pick<PaymentInput, "type" | "paymentmethodId" | "issuerId" | "mandateId" | "redirectUrl" | "details">;
+};
+export type CreateOrderPaymentResponse = Payment;
+export const CreateOrderPaymentRequest$outboundSchema: z.ZodType<CreateOrderPaymentRequest> = z.object({
+    orderId: z.string(),
+    data: PaymentInput$outboundSchema.pick({ type: true, paymentmethodId: true, issuerId: true, mandateId: true, redirectUrl: true, details: true }),
+});
+export const CreateOrderPaymentResponse$inboundSchema = Payment$inboundSchema;
+
+export type GetOrderPaymentRequest = { orderId: string; id: number };
+export type GetOrderPaymentResponse = Payment;
+export const GetOrderPaymentRequest$outboundSchema: z.ZodType<GetOrderPaymentRequest> = z.object({ orderId: z.string(), id: z.number().int() });
+export const GetOrderPaymentResponse$inboundSchema = Payment$inboundSchema;

@@ -7,6 +7,7 @@ import { remap as remap$ } from "../../lib/primitives.js";
 import { buildPaginated, Paginated } from "../pagination.js";
 import { Component, Component$inboundSchema } from "../cms/component.js";
 import { HalLinks$inboundSchema } from "../hal.js";
+import { ComponentField, ComponentField$inboundSchema } from "../cms/component-field.js";
 
 export type ListComponentsRequest = {
     /**
@@ -102,3 +103,15 @@ export const GetComponentRequest$outboundSchema: z.ZodType<
 export const GetComponentResponse$inboundSchema: z.ZodType<
     GetComponentResponse
 > = Component$inboundSchema;
+
+export type ListComponentFieldsRequest = { componentId: number; filter?: Record<string, unknown> | undefined; sort?: string | undefined; page?: number | undefined; limit?: number | undefined };
+export type ListComponentFieldsResponse = Paginated<ComponentField>;
+export const ListComponentFieldsRequest$outboundSchema: z.ZodType<ListComponentFieldsRequest> = z.object({ componentId: z.number().int(), filter: z.record(z.string(), z.unknown()).optional(), sort: z.string().optional(), page: z.number().int().positive().optional(), limit: z.number().int().positive().max(250).optional() });
+export const ListComponentFieldsResponse$inboundSchema: z.ZodType<ListComponentFieldsResponse> = z.object({
+    _embedded: z.object({ component_fields: z.array(ComponentField$inboundSchema) }), count: z.number(), _links: HalLinks$inboundSchema.optional(),
+}).transform((value) => buildPaginated(value._embedded.component_fields, value.count, value._links));
+
+export type GetComponentFieldRequest = { componentId: number; id: number };
+export type GetComponentFieldResponse = ComponentField;
+export const GetComponentFieldRequest$outboundSchema: z.ZodType<GetComponentFieldRequest> = z.object({ componentId: z.number().int(), id: z.number().int() });
+export const GetComponentFieldResponse$inboundSchema = ComponentField$inboundSchema;

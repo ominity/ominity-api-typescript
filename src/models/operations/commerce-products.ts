@@ -144,3 +144,8 @@ export const ListProductOffersResponse$inboundSchema: z.ZodType<
     v._links,
   )
 );
+
+export type GetProductOfferRequest = { productId: number; id: number };
+export type GetProductOfferResponse = ProductOffer;
+export const GetProductOfferRequest$outboundSchema: z.ZodType<GetProductOfferRequest> = z.object({ productId: z.number().int(), id: z.number().int() });
+export const GetProductOfferResponse$inboundSchema = ProductOffer$inboundSchema;

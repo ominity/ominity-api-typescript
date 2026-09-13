@@ -4,6 +4,7 @@
 
 import { invoicesGet } from "../../funcs/commerce/invoicesGet.js";
 import { invoicesList } from "../../funcs/commerce/invoicesList.js";
+import { invoicesCreate, invoicesDownloadPdf, invoicesUpdate } from "../../funcs/commerce/invoicesMutations.js";
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import * as operations from "../../models/operations/index.js";
 import { unwrapAsync } from "../../types/fp.js";
@@ -35,5 +36,17 @@ export class Invoices extends ClientSDK {
             request,
             options,
         ));
+    }
+
+    async create(request: operations.CreateInvoiceRequest, options?: RequestOptions): Promise<operations.CreateInvoiceResponse> {
+        return unwrapAsync(invoicesCreate(this, request, options));
+    }
+
+    async update(request: operations.UpdateInvoiceRequest, options?: RequestOptions): Promise<operations.UpdateInvoiceResponse> {
+        return unwrapAsync(invoicesUpdate(this, request, options));
+    }
+
+    async downloadPdf(request: operations.DownloadInvoicePdfRequest, options?: RequestOptions): Promise<Uint8Array> {
+        return unwrapAsync(invoicesDownloadPdf(this, request, options));
     }
 }

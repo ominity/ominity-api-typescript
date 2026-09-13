@@ -6,3 +6,4 @@ export * from "./commerce/index.js";
 export * from "./localization/index.js";
 export * from "./hal.js";
 export * from "./pagination.js";
+export * from "./media-library.js";

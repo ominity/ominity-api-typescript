@@ -14,8 +14,8 @@ export type ProductRoute = {
 };
 
 export type ProductMeasurement = {
-  value: number;
-  unit: string;
+  value: number | null;
+  unit: string | null;
 };
 
 export type ProductMeasurements = {
@@ -33,7 +33,7 @@ export type ProductReviewBreakdown = {
 export type ProductReviews = {
   total: number;
   rating: number | null;
-  breakdown: Array<ProductReviewBreakdown>;
+  breakdown: Record<string, number> | Array<ProductReviewBreakdown>;
 };
 
 export type Product = {
@@ -54,7 +54,7 @@ export type Product = {
   type: string;
   condition: string;
   categoryId: number;
-  stock: number;
+  stock: number | null;
   isBackorderAllowed: boolean;
   routes: Record<string, ProductRoute>;
   measurements?: ProductMeasurements;
@@ -77,8 +77,8 @@ export const ProductRoute$inboundSchema: z.ZodType<ProductRoute> = z.object({
 
 /** @internal */
 export const ProductMeasurement$inboundSchema: z.ZodType<ProductMeasurement> = z.object({
-  value: z.number(),
-  unit: z.string(),
+  value: z.number().nullable(),
+  unit: z.string().nullable(),
 });
 
 /** @internal */
@@ -99,7 +99,10 @@ export const ProductReviewBreakdown$inboundSchema: z.ZodType<ProductReviewBreakd
 export const ProductReviews$inboundSchema: z.ZodType<ProductReviews> = z.object({
   total: z.number(),
   rating: z.nullable(z.number()),
-  breakdown: z.array(ProductReviewBreakdown$inboundSchema),
+  breakdown: z.union([
+    z.record(z.string(), z.number()),
+    z.array(ProductReviewBreakdown$inboundSchema),
+  ]),
 });
 
 /** @internal */
@@ -121,7 +124,7 @@ export const Product$inboundSchema: z.ZodType<Product> = z.object({
   type: z.string(),
   condition: z.string(),
   categoryId: z.number(),
-  stock: z.number(),
+  stock: z.number().nullable(),
   isBackorderAllowed: z.boolean(),
   routes: z.record(z.string(), ProductRoute$inboundSchema),
   measurements: ProductMeasurements$inboundSchema.optional(),

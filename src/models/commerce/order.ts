@@ -18,15 +18,15 @@ export type ShippingTotals = {
 export type Order = {
     resource: string;
     id: number;
-    customerId: number;
+    customerId: number | null;
     cartId: string | null;
-    channelId: number;
+    channelId: number | null;
     languageId: number | null;
     number: string;
     invoiceId: number | null;
     status: string;
-    companyName: string;
-    companyVat: string;
+    companyName: string | null;
+    companyVat: string | null;
     billingAddress: Address;
     shippingAddress: Address;
     subtotalAmount: CurrencyAmount;
@@ -55,15 +55,15 @@ export const ShippingTotals$inboundSchema: z.ZodType<ShippingTotals> = z.object(
 export const Order$inboundSchema: z.ZodType<Order> = z.object({
     resource: z.string(),
     id: z.number(),
-    customerId: z.number(),
+    customerId: z.number().nullable(),
     cartId: z.string().nullable(),
-    channelId: z.number(),
+    channelId: z.number().nullable(),
     languageId: z.number().nullable(),
     number: z.string(),
     invoiceId: z.number().nullable(),
     status: z.string(),
-    companyName: z.string(),
-    companyVat: z.string(),
+    companyName: z.string().nullable(),
+    companyVat: z.string().nullable(),
     billingAddress: Address$inboundSchema,
     shippingAddress: Address$inboundSchema,
     subtotalAmount: CurrencyAmount$inboundSchema,

@@ -47,7 +47,7 @@ async function $do(
         | RequestTimeoutError
     >
 > {
-    const path = pathToFunc("/commerce/subscription-intervals")();
+    const path = pathToFunc("/commerce/subscriptions/intervals")();
 
     const headers = new Headers({
         Accept: "application/hal+json",
@@ -135,4 +135,3 @@ async function $do(
 
     return result;
 }
-

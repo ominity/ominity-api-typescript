@@ -7,11 +7,11 @@ import { remap as remap$ } from "../../lib/primitives.js";
 import { HalLinks, HalLinks$inboundSchema } from "../hal.js";
 
 export type Component = {
+    resource: "component";
     id: number;
     slug: string;
     name: string;
-    description: string;
-    type: string;
+    fields?: Array<unknown>;
     createdAt: string;
     updatedAt: string;
     links?: HalLinks;
@@ -19,18 +19,16 @@ export type Component = {
 
 /** @internal */
 export const Component$inboundSchema: z.ZodType<Component> = z.object({
+    resource: z.literal("component"),
     id: z.number(),
     slug: z.string(),
     name: z.string(),
-    description: z.string(),
-    type: z.string(),
-    created_at: z.string(),
-    updated_at: z.string(),
+    fields: z.array(z.unknown()).optional(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
     _links: HalLinks$inboundSchema.optional(),
 }).transform((v) => {
     return remap$(v, {
-        "created_at": "createdAt",
-        "updated_at": "updatedAt",
         "_links": "links",
     }) as Component;
 });
