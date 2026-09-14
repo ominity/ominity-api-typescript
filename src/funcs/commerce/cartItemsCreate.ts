@@ -69,7 +69,7 @@ async function $do(
     options: options,
   };
 
-  const body = encodeJSON("body", request, { explode: true });
+  const body = encodeJSON("body", request.data, { explode: true });
 
   const requestRes = client._createRequest(
     context,
@@ -124,4 +124,3 @@ async function $do(
 
   return result;
 }
-

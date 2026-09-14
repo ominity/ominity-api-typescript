@@ -137,6 +137,32 @@ test("new operations encode deep filters, parse pagination, JSON bodies, and byt
   assert.deepEqual(JSON.parse(seen[3].body), { source_language: "en", target_languages: ["nl"], fields: [{ key: "title", source: "Hello" }] });
 });
 
+test("cart item creation sends only the camelCase request body", async () => {
+  let forwardedRequest;
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async (request) => {
+        forwardedRequest = request.clone();
+        return new Response(JSON.stringify({ id: "item-1" }), {
+          status: 201,
+          headers: { "content-type": "application/hal+json" },
+        });
+      },
+    }),
+  });
+
+  await sdk.commerce.cartItems.create("cart-1", "6", 1, noRetries);
+
+  assert.ok(forwardedRequest instanceof Request);
+  assert.equal(forwardedRequest.method, "POST");
+  assert.equal(new URL(forwardedRequest.url).pathname, "/api/v1/commerce/carts/cart-1/items");
+  assert.deepEqual(JSON.parse(await forwardedRequest.text()), {
+    productId: "6",
+    quantity: 1,
+  });
+});
+
 test("Subscription parses the corrected productId field", () => {
   const parsed = Subscription$inboundSchema.parse({
     resource: "subscription", id: 1, customerId: 2, productId: 3, intervalId: 4, status: "active",
@@ -251,4 +277,34 @@ test("existing subscription interval and VAT helpers use the registered routes",
     "/api/v1/commerce/subscriptions/intervals/4",
     "/api/v1/commerce/vatvalidations/BE0123456789",
   ]);
+});
+
+test("user customer membership failures preserve the API status and detail", async () => {
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async () => new Response(JSON.stringify({
+        status: 403,
+        title: "Forbidden",
+        detail: "Could not authorize request",
+        _links: {
+          documentation: {
+            href: "https://docs.ominity.com/overview/handling-errors",
+            type: "text/html",
+          },
+        },
+      }), {
+        status: 403,
+        headers: { "content-type": "application/json" },
+      }),
+    }),
+  });
+
+  await assert.rejects(
+    sdk.users.customers.list({ id: 7 }, noRetries),
+    (error) => error instanceof ErrorResponse
+      && error.status === 403
+      && error.statusCode === 403
+      && error.detail === "Could not authorize request",
+  );
 });

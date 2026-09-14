@@ -38,7 +38,7 @@ export class CartItems extends ClientSDK {
   ): Promise<operations.CreateCartItemResponse> {
     return unwrapAsync(cartItemsCreate(
       this,
-      { cartId, data: { product_id: productId, quantity } },
+      { cartId, data: { productId, quantity } },
       options,
     ));
   }

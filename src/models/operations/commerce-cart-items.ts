@@ -96,16 +96,26 @@ export const GetCartItemResponse$inboundSchema: z.ZodType<
   GetCartItemResponse
 > = CartItem$inboundSchema;
 
+export type CreateCartItemInput = {
+  productId: string;
+  productOfferId?: string | undefined;
+  quantity?: number | undefined;
+};
+
 export type CreateCartItemRequest = {
   cartId: string;
-  data: Record<string, any>;
+  data: CreateCartItemInput;
 };
 export type CreateCartItemResponse = CartItem;
 
 /** @internal */
 export const CreateCartItemRequest$outboundSchema: z.ZodType<CreateCartItemRequest> = z.object({
   cartId: z.string(),
-  data: z.record(z.string(), z.any()),
+  data: z.object({
+    productId: z.string(),
+    productOfferId: z.string().optional(),
+    quantity: z.number().optional(),
+  }),
 });
 /** @internal */
 export const CreateCartItemResponse$inboundSchema: z.ZodType<CreateCartItemResponse> = CartItem$inboundSchema;
