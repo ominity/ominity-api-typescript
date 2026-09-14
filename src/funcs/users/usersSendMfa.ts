@@ -161,10 +161,10 @@ async function $do(
         | SDKValidationError
     >(
         M.json(200, SendMfaResponse$inboundSchema, {
-            ctype: "application/hal+json",
+            ctype: "application/json",
         }),
         M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
-            ctype: "application/hal+json",
+            ctype: "application/json",
         }),
         M.fail("5XX"),
     )(response, req, { extraFields: responseFields });

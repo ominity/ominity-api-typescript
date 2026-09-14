@@ -173,7 +173,7 @@ async function $do(
     >(
         M.json(200, operations.ListContentResponse$inboundSchema, { ctype: "application/hal+json" }),
         M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
-            ctype: "application/hal+json",
+            ctype: "application/json",
         }),
         M.fail("4XX"),
         M.fail("5XX"),

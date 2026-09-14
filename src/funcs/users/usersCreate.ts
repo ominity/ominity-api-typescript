@@ -144,7 +144,7 @@ async function $do(
     M.json(200, User$inboundSchema, { ctype: "application/hal+json" }),
     M.json(201, User$inboundSchema, { ctype: "application/hal+json" }),
     M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
-      ctype: "application/hal+json",
+      ctype: "application/json",
     }),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

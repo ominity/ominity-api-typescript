@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as api from "../dist/esm/index.js";
+import { ErrorResponse } from "../dist/esm/models/errors/index.js";
 import { Subscription$inboundSchema } from "../dist/esm/models/index.js";
 
 const noRetries = { retries: { strategy: "none" } };
@@ -144,6 +145,89 @@ test("Subscription parses the corrected productId field", () => {
     updatedAt: "2026-09-13T00:00:00Z", createdAt: "2026-09-13T00:00:00Z",
   });
   assert.equal(parsed.productId, 3);
+});
+
+test("user action endpoints parse application/json responses and errors", async () => {
+  const responses = [
+    { status: 200, body: { success: true } },
+    { status: 200, body: { success: true } },
+    { status: 200, body: { success: true } },
+    { status: 200, body: { success: true, message: "Recovery code validated" } },
+    {
+      status: 200,
+      body: {
+        success: true,
+        message: "Password reset link send to users email.",
+        expiresAt: "2026-09-14T10:30:00Z",
+        createdAt: "2026-09-14T10:00:00Z",
+      },
+    },
+    {
+      status: 200,
+      body: {
+        success: true,
+        message: "Password reset successfully.",
+        updatedAt: "2026-09-14T10:05:00Z",
+      },
+    },
+    {
+      status: 422,
+      body: {
+        status: 422,
+        title: "Unprocessable Content",
+        detail: "The code field is required.",
+        _links: {
+          documentation: {
+            href: "https://docs.ominity.com/overview/handling-errors",
+            type: "text/html",
+          },
+        },
+      },
+    },
+  ];
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async () => {
+        const response = responses.shift();
+        assert.ok(response, "a mocked response is available");
+        return new Response(JSON.stringify(response.body), {
+          status: response.status,
+          headers: { "content-type": "application/json" },
+        });
+      },
+    }),
+  });
+
+  assert.deepEqual(await sdk.users.mfaMethods.send({ id: 7, method: "email" }), { success: true });
+  assert.deepEqual(await sdk.users.mfaMethods.validate({ id: 7, method: "email", code: "123456" }), { success: true });
+  assert.deepEqual(await sdk.users.mfaMethods.disable({ id: 7, method: "email" }), { success: true });
+  assert.deepEqual(
+    await sdk.users.recoveryCodes.validate({ id: 7, code: "recovery-code" }),
+    { success: true, message: "Recovery code validated" },
+  );
+  assert.equal(
+    (await sdk.users.sendPasswordResetLink({
+      email: "person@example.test",
+      redirectUrl: "https://example.test/reset-password",
+    })).expiresAt,
+    "2026-09-14T10:30:00Z",
+  );
+  assert.equal(
+    (await sdk.users.resetPassword({
+      email: "person@example.test",
+      token: "reset-token",
+      password: "new-password",
+    })).updatedAt,
+    "2026-09-14T10:05:00Z",
+  );
+
+  await assert.rejects(
+    sdk.users.mfaMethods.send({ id: 7, method: "email" }),
+    (error) => error instanceof ErrorResponse
+      && error.status === 422
+      && error.detail === "The code field is required.",
+  );
 });
 
 test("existing subscription interval and VAT helpers use the registered routes", async () => {

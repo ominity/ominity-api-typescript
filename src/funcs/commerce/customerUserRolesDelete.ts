@@ -146,7 +146,7 @@ async function $do(
   >(
     M.nil(204, operations.DeleteCustomerUserRoleResponse$inboundSchema),
     M.jsonErr("4XX", errors.ErrorResponse$inboundSchema, {
-      ctype: "application/hal+json",
+      ctype: "application/json",
     }),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
