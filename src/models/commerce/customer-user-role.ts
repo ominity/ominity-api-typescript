@@ -12,8 +12,6 @@ export type CustomerUserRole = {
     key: string;
     name: string;
     description: string;
-    nameTranslations: Record<string, string>;
-    descriptionTranslations: Record<string, string | null>;
     permissions: Array<string>;
     isSystem: boolean;
     isAssignable: boolean;
@@ -29,8 +27,6 @@ export const CustomerUserRole$inboundSchema: z.ZodType<CustomerUserRole> = z.obj
     key: z.string(),
     name: z.string(),
     description: z.string(),
-    nameTranslations: z.record(z.string(), z.string()),
-    descriptionTranslations: z.record(z.string(), z.string().nullable()),
     permissions: z.array(z.string()),
     isSystem: z.boolean(),
     isAssignable: z.boolean(),
