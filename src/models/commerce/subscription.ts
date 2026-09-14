@@ -8,7 +8,7 @@ import { SubscriptionInterval, SubscriptionInterval$inboundSchema } from "./subs
 export type SubscriptionPeriod = {
   startedAt: string;
   endsAt: string;
-  daysLeft: number;
+  daysLeft: number | null;
 };
 
 export type Subscription = {
@@ -35,7 +35,7 @@ export type Subscription = {
 export const SubscriptionPeriod$inboundSchema: z.ZodType<SubscriptionPeriod> = z.object({
   startedAt: z.string(),
   endsAt: z.string(),
-  daysLeft: z.number(),
+  daysLeft: z.number().nullable(),
 });
 
 /** @internal */
