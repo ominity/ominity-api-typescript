@@ -14,6 +14,8 @@ export type SubscriptionPeriod = {
 export type Subscription = {
   resource: "subscription";
   id: number;
+  /** Readable reference; its format is configured per install. */
+  reference?: string | null | undefined;
   customerId: number;
   productId: number;
   intervalId: number;
@@ -42,6 +44,7 @@ export const SubscriptionPeriod$inboundSchema: z.ZodType<SubscriptionPeriod> = z
 export const Subscription$inboundSchema: z.ZodType<Subscription> = z.object({
   resource: z.literal("subscription"),
   id: z.number().int(),
+  reference: z.string().nullable().optional(),
   customerId: z.number().int(),
   productId: z.number().int(),
   intervalId: z.number().int(),

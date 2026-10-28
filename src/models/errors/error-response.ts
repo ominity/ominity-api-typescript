@@ -30,6 +30,10 @@ export type ErrorResponseData = {
    */
   detail: string;
   /**
+   * Stable, machine-readable reason of a refusal, e.g. `subscription.next_period_locked`.
+   */
+  code?: string | undefined;
+  /**
    * Optional validation errors keyed by field name.
    */
   fields?: Record<string, string[]> | undefined;
@@ -43,6 +47,7 @@ export class ErrorResponse extends OminityError {
   status: number;
   title: string;
   detail: string;
+  code?: string | undefined;
   fields?: Record<string, string[]> | undefined;
   links: ErrorResponseLinks;
 
@@ -61,6 +66,7 @@ export class ErrorResponse extends OminityError {
     this.status = err.status;
     this.title = err.title;
     this.detail = err.detail;
+    if (err.code != null) this.code = err.code;
     if (err.fields != null) this.fields = err.fields;
     this.links = err.links;
 
@@ -78,13 +84,17 @@ export const ErrorResponse$inboundSchema: z.ZodType<
   status: types.number(),
   title: types.string(),
   detail: types.string(),
+  code: z.optional(z.string()),
   fields: z.optional(ErrorResponseFieldsSchema),
+  errors: z.optional(ErrorResponseFieldsSchema),
   _links: z.lazy(() => ErrorResponseLinks$inboundSchema),
   request$: z.custom<Request>(x => x instanceof Request),
   response$: z.custom<Response>(x => x instanceof Response),
   body$: z.string(),
 }).transform((v) => {
-  const remapped = remap$(v, {
+  // The API sends validation messages as `errors`.
+  const { errors, ...rest } = v;
+  const remapped = remap$({ ...rest, fields: rest.fields ?? errors }, {
     "_links": "links",
   });
 
@@ -100,6 +110,7 @@ export type ErrorResponse$Outbound = {
   status: number;
   title: string;
   detail: string;
+  code?: string | undefined;
   fields?: Record<string, string[]> | undefined;
   _links: ErrorResponseLinks$Outbound;
 };
@@ -115,6 +126,7 @@ export const ErrorResponse$outboundSchema: z.ZodType<
       status: data.status,
       title: data.title,
       detail: data.detail,
+      code: data.code,
       fields: data.fields,
       _links: data.links,
     };

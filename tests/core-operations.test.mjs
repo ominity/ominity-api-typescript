@@ -43,6 +43,12 @@ const operationCases = [
   ["customerSubscriptionsRenew", { customerId: 1, id: 2 }, "POST", "/commerce/customers/1/subscriptions/2/renew"],
   ["customerSubscriptionsListTransitionProducts", { customerId: 1, subscriptionId: 2 }, "GET", "/commerce/customers/1/subscriptions/2/transition"],
   ["customerSubscriptionsGetTransitionProduct", { customerId: 1, subscriptionId: 2, productId: 3 }, "GET", "/commerce/customers/1/subscriptions/2/transition/3"],
+  ["customerSubscriptionsListTransitions", { customerId: 1, subscriptionId: 2 }, "GET", "/commerce/customers/1/subscriptions/2/transitions"],
+  ["customerSubscriptionsQuoteChange", { customerId: 1, subscriptionId: 2, data: { toOfferId: 12 } }, "POST", "/commerce/customers/1/subscriptions/2/changes/quote"],
+  ["customerSubscriptionsConfirmChange", { customerId: 1, subscriptionId: 2, data: { quoteId: "change-id" } }, "POST", "/commerce/customers/1/subscriptions/2/changes"],
+  ["customerSubscriptionsCancelChange", { customerId: 1, subscriptionId: 2, changeId: "change-id" }, "DELETE", "/commerce/customers/1/subscriptions/2/changes/change-id"],
+  ["customerSubscriptionsCancel", { customerId: 1, subscriptionId: 2 }, "POST", "/commerce/customers/1/subscriptions/2/cancellation"],
+  ["customerSubscriptionsRevokeCancellation", { customerId: 1, subscriptionId: 2 }, "DELETE", "/commerce/customers/1/subscriptions/2/cancellation"],
   ["shippingClassesList", {}, "GET", "/commerce/shipping-classes"],
   ["shippingClassesGet", { id: 1 }, "GET", "/commerce/shipping-classes/1"],
   ["invoicesCreate", { data: {} }, "POST", "/commerce/invoices"],
@@ -100,7 +106,7 @@ test("all added core operations construct the registered API method and path", a
   }
 
   assert.equal(seen.length, operationCases.length);
-  assert.equal(operationCases.length, 69);
+  assert.equal(operationCases.length, 75);
 });
 
 test("new operations encode deep filters, parse pagination, JSON bodies, and bytes", async () => {
@@ -171,6 +177,124 @@ test("Subscription parses the corrected productId field", () => {
     updatedAt: "2026-09-13T00:00:00Z", createdAt: "2026-09-13T00:00:00Z",
   });
   assert.equal(parsed.productId, 3);
+  assert.equal(parsed.reference, undefined);
+});
+
+const subscriptionChange = (overrides = {}) => ({
+  resource: "subscription_change",
+  id: "9d3c6a1e-0000-4000-8000-000000000001",
+  subscriptionId: 2,
+  type: "change",
+  direction: "upgrade",
+  status: "quoted",
+  timing: "immediate",
+  effectiveAt: "2026-10-28T00:00:00+00:00",
+  from: { productId: 3, offerId: 10, intervalId: 1, recurringAmount: { value: "10.00", currency: "EUR" }, quantity: 1 },
+  to: { productId: 4, offerId: 12, intervalId: 1, recurringAmount: { value: "20.00", currency: "EUR" }, quantity: 1 },
+  quote: {
+    lines: [
+      { type: "charge", description: "rest_of_period", amount: { value: "6.45", currency: "EUR" }, tax: { value: "1.35", currency: "EUR" }, taxRate: 21 },
+      { type: "credit", description: "unused_current_period", amount: { value: "3.23", currency: "EUR" }, tax: { value: "0.68", currency: "EUR" }, taxRate: 21 },
+    ],
+    charge: { value: "6.45", currency: "EUR" },
+    credit: { value: "3.23", currency: "EUR" },
+    settlement: "next_invoice",
+  },
+  warnings: [],
+  quoteExpiresAt: "2026-10-28T01:00:00+00:00",
+  orderId: null,
+  createdAt: "2026-10-28T00:00:00+00:00",
+  _links: { subscription: { href: "https://example.test/api/v1/commerce/customers/1/subscriptions/2", type: "application/hal+json" } },
+  ...overrides,
+});
+
+test("subscription plan changes and cancellation follow the quote/confirm flow", async () => {
+  const seen = [];
+  const product = {
+    resource: "product", id: 4, sku: "PRO", ean: null, mpn: null, asin: null, title: "Pro", shortTitle: null,
+    coverImage: null, additionalImages: [], shortDescription: null, description: null, bulletpoints: [], boxContent: null,
+    type: "virtual", condition: "new", categoryId: 1, stock: null, isBackorderAllowed: false, routes: {}, searches: [],
+    customFields: [], publishedAt: null, updatedAt: "2026-10-28T00:00:00Z", createdAt: "2026-10-28T00:00:00Z",
+  };
+  const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  const responses = [
+    json(200, { count: 1, _embedded: { transitions: [{
+      productId: 4, offerId: 12, direction: "upgrade", timing: "immediate", effectiveAt: "2026-10-28T00:00:00+00:00",
+      allowed: true, reasons: [], charge: { value: "6.45", currency: "EUR" }, product,
+    }] } }),
+    json(201, subscriptionChange()),
+    json(200, subscriptionChange({
+      status: "awaiting_payment",
+      orderId: 55,
+      _links: { checkout: { href: "https://example.test/api/v1/commerce/customers/1/orders/55", type: "application/hal+json" } },
+    })),
+    new Response(null, { status: 204 }),
+    json(201, subscriptionChange({ type: "cancel", direction: "cancel", timing: "period_end", to: { productId: null, offerId: null, intervalId: null, recurringAmount: null, quantity: null }, warnings: ["notice_period_applies"] })),
+    json(200, subscriptionChange({ type: "cancel", status: "pending" })),
+    new Response(null, { status: 204 }),
+  ];
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({ fetcher: async (request) => {
+      seen.push({ path: new URL(request.url).pathname, method: request.method, body: await request.clone().text() });
+      return responses.shift();
+    } }),
+  });
+  const subscriptions = sdk.commerce.customerSubscriptions;
+
+  const transitions = await subscriptions.listTransitions({ customerId: 1, subscriptionId: 2 });
+  assert.equal(transitions.count, 1);
+  assert.equal(transitions.items[0].offerId, 12);
+  assert.equal(transitions.items[0].product.id, 4);
+
+  const quote = await subscriptions.quoteChange({ customerId: 1, subscriptionId: 2, data: { toOfferId: 12, timing: "immediate" } });
+  assert.equal(quote.status, "quoted");
+  assert.equal(quote.quote.lines.length, 2);
+  assert.equal(quote.links?.subscription?.href, "https://example.test/api/v1/commerce/customers/1/subscriptions/2");
+  assert.deepEqual(JSON.parse(seen[1].body), { toOfferId: 12, timing: "immediate" });
+
+  const confirmed = await subscriptions.confirmChange({ customerId: 1, subscriptionId: 2, data: { quoteId: quote.id } });
+  assert.equal(confirmed.orderId, 55);
+  assert.equal(confirmed.links?.checkout?.href, "https://example.test/api/v1/commerce/customers/1/orders/55");
+  assert.deepEqual(JSON.parse(seen[2].body), { quoteId: quote.id });
+
+  await subscriptions.cancelChange({ customerId: 1, subscriptionId: 2, changeId: quote.id });
+  assert.equal(seen[3].path, `/api/v1/commerce/customers/1/subscriptions/2/changes/${quote.id}`);
+
+  const cancellation = await subscriptions.cancel({ customerId: 1, subscriptionId: 2 });
+  assert.equal(cancellation.type, "cancel");
+  assert.equal(cancellation.to.recurringAmount, null);
+  assert.deepEqual(JSON.parse(seen[4].body), {});
+
+  await subscriptions.cancel({ customerId: 1, subscriptionId: 2, data: { quoteId: cancellation.id } });
+  assert.deepEqual(JSON.parse(seen[5].body), { quoteId: cancellation.id });
+
+  await subscriptions.revokeCancellation({ customerId: 1, subscriptionId: 2 });
+  assert.deepEqual(seen.map((request) => request.method), ["GET", "POST", "POST", "DELETE", "POST", "POST", "DELETE"]);
+});
+
+test("a refused subscription change exposes the reason code and field messages", async () => {
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async () => new Response(JSON.stringify({
+        status: 422,
+        title: "Unprocessable Content",
+        detail: "Validation failed for the request",
+        code: "subscription.next_period_locked",
+        errors: { change: ["The next period is already being prepared."] },
+        _links: { documentation: { href: "https://docs.ominity.com/overview/handling-errors", type: "text/html" } },
+      }), { status: 422, headers: { "content-type": "application/json" } }),
+    }),
+  });
+
+  await assert.rejects(
+    sdk.commerce.customerSubscriptions.confirmChange({ customerId: 1, subscriptionId: 2, data: { quoteId: "change-id" } }, noRetries),
+    (error) => error instanceof ErrorResponse
+      && error.status === 422
+      && error.code === "subscription.next_period_locked"
+      && error.fields?.change?.[0] === "The next period is already being prepared.",
+  );
 });
 
 test("user action endpoints parse application/json responses and errors", async () => {
