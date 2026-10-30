@@ -115,7 +115,7 @@ async function $do(
     | RequestAbortedError
     | RequestTimeoutError
   >(
-    M.json(201, operations.CreateCartItemResponse$inboundSchema),
+    M.json([200, 201], operations.CreateCartItemResponse$inboundSchema),
     M.fail([400, 401, 403, 404, "4XX", 500, "5XX"])
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

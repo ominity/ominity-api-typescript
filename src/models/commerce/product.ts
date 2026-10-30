@@ -5,6 +5,7 @@
 import * as z from "zod/v4";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { HalLinks, HalLinks$inboundSchema } from "../hal.js";
+import { ProductOffer, ProductOffer$inboundSchema } from "./product-offer.js";
 
 export type ProductRoute = {
   resource: string;
@@ -57,6 +58,8 @@ export type Product = {
   stock: number | null;
   isBackorderAllowed: boolean;
   routes: Record<string, ProductRoute>;
+  /** Present when requested with `include: "offers"`. */
+  offers?: Array<ProductOffer>;
   measurements?: ProductMeasurements;
   reviews?: ProductReviews;
   searches: Array<string>;
@@ -127,6 +130,7 @@ export const Product$inboundSchema: z.ZodType<Product> = z.object({
   stock: z.number().nullable(),
   isBackorderAllowed: z.boolean(),
   routes: z.record(z.string(), ProductRoute$inboundSchema),
+  offers: z.array(ProductOffer$inboundSchema).optional(),
   measurements: ProductMeasurements$inboundSchema.optional(),
   reviews: ProductReviews$inboundSchema.optional(),
   searches: z.array(z.string()),

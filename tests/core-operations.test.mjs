@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import * as api from "../dist/esm/index.js";
 import { ErrorResponse } from "../dist/esm/models/errors/index.js";
-import { Subscription$inboundSchema } from "../dist/esm/models/index.js";
+import { CartItem$inboundSchema, Product$inboundSchema, Subscription$inboundSchema } from "../dist/esm/models/index.js";
 
 const noRetries = { retries: { strategy: "none" } };
 
@@ -143,6 +143,13 @@ test("new operations encode deep filters, parse pagination, JSON bodies, and byt
   assert.deepEqual(JSON.parse(seen[3].body), { source_language: "en", target_languages: ["nl"], fields: [{ key: "title", source: "Hello" }] });
 });
 
+const amount = (value) => ({ value, currency: "EUR" });
+const cartItemPayload = (extra = {}) => ({
+  resource: "cartitem", id: "item-1", cartId: "cart-1", productId: 6, productOfferId: 9, quantity: 1,
+  unitAmount: amount("19.99"), discountAmount: amount("0.00"), taxAmount: amount("3.47"), totalAmount: amount("19.99"),
+  isShippingRequired: true, updatedAt: "2026-10-29T00:00:00Z", createdAt: "2026-10-29T00:00:00Z", ...extra,
+});
+
 test("cart item creation sends only the camelCase request body", async () => {
   let forwardedRequest;
   const sdk = new api.Ominity({
@@ -150,7 +157,7 @@ test("cart item creation sends only the camelCase request body", async () => {
     httpClient: new api.HTTPClient({
       fetcher: async (request) => {
         forwardedRequest = request.clone();
-        return new Response(JSON.stringify({ id: "item-1" }), {
+        return new Response(JSON.stringify(cartItemPayload()), {
           status: 201,
           headers: { "content-type": "application/hal+json" },
         });
@@ -167,6 +174,21 @@ test("cart item creation sends only the camelCase request body", async () => {
     productId: "6",
     quantity: 1,
   });
+});
+
+test("adding a product already in the cart accepts the 200 merge response", async () => {
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async () => new Response(JSON.stringify(cartItemPayload({ quantity: 2 })), {
+        status: 200,
+        headers: { "content-type": "application/hal+json" },
+      }),
+    }),
+  });
+
+  const item = await sdk.commerce.cartItems.create("cart-1", "6", 1, noRetries);
+  assert.equal(item.quantity, 2);
 });
 
 test("Subscription parses the corrected productId field", () => {
@@ -431,4 +453,42 @@ test("user customer membership failures preserve the API status and detail", asy
       && error.statusCode === 403
       && error.detail === "Could not authorize request",
   );
+});
+
+test("Product keeps the offers requested with include=offers", () => {
+  const product = {
+    resource: "product", id: 4, sku: "PRO", ean: null, mpn: null, asin: null, title: "Pro", shortTitle: null,
+    coverImage: null, additionalImages: [], shortDescription: null, description: null, bulletpoints: [], boxContent: null,
+    type: "virtual", condition: "new", categoryId: 1, stock: null, isBackorderAllowed: false, routes: {}, searches: [],
+    customFields: [], publishedAt: null, updatedAt: "2026-10-28T00:00:00Z", createdAt: "2026-10-28T00:00:00Z",
+  };
+
+  assert.equal(Product$inboundSchema.parse(product).offers, undefined);
+  const parsed = Product$inboundSchema.parse({
+    ...product,
+    offers: [{
+      resource: "product_offer", id: 9, productId: 4, type: "once", intervalId: null, quantity: 1,
+      prices: { EUR: { amount: 19.99, formatted: "€ 19,99" } },
+      _links: { self: { href: "https://example.test/api/v1/commerce/products/4/offers/9", type: "application/hal+json" } },
+    }],
+  });
+  assert.equal(parsed.offers?.[0]?.id, 9);
+  assert.equal(parsed.offers?.[0]?.links?.self?.href, "https://example.test/api/v1/commerce/products/4/offers/9");
+});
+
+test("CartItem is typed and keeps the embedded product", () => {
+  const item = CartItem$inboundSchema.parse(cartItemPayload({
+    _embedded: { product: {
+      resource: "product", id: 6, sku: "PRO", ean: null, mpn: null, asin: null, title: "Pro", shortTitle: null,
+      coverImage: null, additionalImages: [], shortDescription: null, description: null, bulletpoints: [], boxContent: null,
+      type: "physical", condition: "new", categoryId: 1, stock: null, isBackorderAllowed: false, routes: {}, searches: [],
+      customFields: [], publishedAt: null, updatedAt: "2026-10-29T00:00:00Z", createdAt: "2026-10-29T00:00:00Z",
+    } },
+    _links: { cart: { href: "https://example.test/api/v1/commerce/carts/cart-1", type: "application/hal+json" } },
+  }));
+
+  assert.equal(item.product?.title, "Pro");
+  assert.equal(item.totalAmount.value, "19.99");
+  assert.equal(item.links?.cart?.href, "https://example.test/api/v1/commerce/carts/cart-1");
+  assert.equal("_embedded" in item, false);
 });
