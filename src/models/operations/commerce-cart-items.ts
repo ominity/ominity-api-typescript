@@ -140,7 +140,7 @@ export type DeleteCartItemRequest = {
   cartId: string;
   itemId: string;
 };
-export type DeleteCartItemResponse = boolean;
+export type DeleteCartItemResponse = void;
 
 /** @internal */
 export const DeleteCartItemRequest$outboundSchema: z.ZodType<DeleteCartItemRequest> = z.object({
@@ -148,4 +148,4 @@ export const DeleteCartItemRequest$outboundSchema: z.ZodType<DeleteCartItemReque
   itemId: z.string(),
 });
 /** @internal */
-export const DeleteCartItemResponse$inboundSchema: z.ZodType<DeleteCartItemResponse> = z.boolean();
+export const DeleteCartItemResponse$inboundSchema: z.ZodType<DeleteCartItemResponse> = z.void();

@@ -191,6 +191,22 @@ test("adding a product already in the cart accepts the 200 merge response", asyn
   assert.equal(item.quantity, 2);
 });
 
+test("removing a cart item accepts the empty 204 response", async () => {
+  let deleted;
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async (request) => {
+        deleted = `${request.method} ${new URL(request.url).pathname}`;
+        return new Response(null, { status: 204 });
+      },
+    }),
+  });
+
+  assert.equal(await sdk.commerce.cartItems.delete("cart-1", "item-1", noRetries), undefined);
+  assert.equal(deleted, "DELETE /api/v1/commerce/carts/cart-1/items/item-1");
+});
+
 test("Subscription parses the corrected productId field", () => {
   const parsed = Subscription$inboundSchema.parse({
     resource: "subscription", id: 1, customerId: 2, productId: 3, intervalId: 4, status: "active",
