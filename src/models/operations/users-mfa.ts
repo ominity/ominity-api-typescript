@@ -49,6 +49,10 @@ export type EnableMfaRequest = {
      * MFA Method.
      */
     method: string;
+    /**
+     * Phone number the codes are sent to, in E.164 format (e.g. `+32470123456`). Required for `sms`.
+     */
+    phone?: string | undefined;
 };
 
 export type EnableMfaResponse = UserMfaMethod;
@@ -59,6 +63,7 @@ export const EnableMfaRequest$outboundSchema: z.ZodType<
 > = z.object({
     id: z.number(),
     method: z.string(),
+    phone: z.string().optional(),
 });
 
 /** @internal */

@@ -80,7 +80,7 @@ async function $do(
         return [parsed, { status: "invalid" }];
     }
     const payload = parsed.value;
-    const body = null;
+    const body = typeof payload.phone === "string" ? JSON.stringify({ phone: payload.phone }) : null;
 
     const path = encodePath(
         "/users/{id}/mfa-methods/{method}/enable",
@@ -90,6 +90,7 @@ async function $do(
 
     const headers = new Headers({
         Accept: "application/hal+json",
+        ...(body ? { "Content-Type": "application/json" } : {}),
     });
 
     const securityInput = await extractSecurity(client._options.security);

@@ -14,8 +14,13 @@ export type UserMfaMethod = {
     verifiedAt?: string | null;
     lastUsedAt?: string | null;
     lastSentAt?: string | null;
+    /** Setup details of an `authenticator` method that is not verified yet. */
     details?: {
+        /** The QR code as an image data URI (`data:image/svg+xml;base64,…`), usable as an `<img>` source. */
         qrCode?: string | undefined;
+        /** The `otpauth://` link the QR code holds; open it to add the account on the same device. */
+        uri?: string | undefined;
+        /** The secret, for entering the account by hand. */
         secret?: string | undefined;
     } | undefined;
     links?: HalLinks;
@@ -32,6 +37,7 @@ export const UserMfaMethod$inboundSchema: z.ZodType<UserMfaMethod> = z.object({
     lastSentAt: z.string().nullable().optional(),
     details: z.object({
         qrCode: z.string().optional(),
+        uri: z.string().optional(),
         secret: z.string().optional(),
     }).optional(),
     _links: HalLinks$inboundSchema.optional(),

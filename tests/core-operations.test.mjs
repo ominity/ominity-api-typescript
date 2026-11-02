@@ -207,6 +207,41 @@ test("removing a cart item accepts the empty 204 response", async () => {
   assert.equal(deleted, "DELETE /api/v1/commerce/carts/cart-1/items/item-1");
 });
 
+test("an authenticator being set up carries its QR code image and otpauth link", async () => {
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async () => new Response(JSON.stringify({
+        resource: "user_mfa_method", userId: 7, method: "authenticator", isEnabled: false,
+        details: { qrCode: "data:image/svg+xml;base64,PHN2Zz4=", uri: "otpauth://totp/Shop:jamie?secret=ABC", secret: "ABC" },
+      }), { status: 200, headers: { "content-type": "application/hal+json" } }),
+    }),
+  });
+
+  const method = await sdk.users.mfaMethods.enable({ id: 7, method: "authenticator" }, noRetries);
+  assert.deepEqual(method.details, { qrCode: "data:image/svg+xml;base64,PHN2Zz4=", uri: "otpauth://totp/Shop:jamie?secret=ABC", secret: "ABC" });
+});
+
+test("enabling SMS sends the phone number; other methods send no body", async () => {
+  const sent = [];
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async (request) => {
+        sent.push({ path: new URL(request.url).pathname, type: request.headers.get("content-type"), body: await request.text() });
+        return new Response(JSON.stringify({ resource: "user_mfa_method", userId: 7, method: "sms", isEnabled: false }), {
+          status: 200, headers: { "content-type": "application/hal+json" },
+        });
+      },
+    }),
+  });
+
+  await sdk.users.mfaMethods.enable({ id: 7, method: "sms", phone: "+32470123456" }, noRetries);
+  await sdk.users.mfaMethods.enable({ id: 7, method: "email" }, noRetries);
+  assert.deepEqual(sent[0], { path: "/api/v1/users/7/mfa-methods/sms/enable", type: "application/json", body: '{"phone":"+32470123456"}' });
+  assert.equal(sent[1].body, "");
+});
+
 test("Subscription parses the corrected productId field", () => {
   const parsed = Subscription$inboundSchema.parse({
     resource: "subscription", id: 1, customerId: 2, productId: 3, intervalId: 4, status: "active",
