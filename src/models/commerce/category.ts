@@ -20,7 +20,7 @@ export type Category = {
   coverImage: string | null;
   routes: Record<string, Route>;
   productsCount: number;
-  customFields: unknown[];
+  customFields: Record<string, unknown> | Array<unknown>;
   updatedAt: string;
   createdAt: string;
   parent?: Category;
@@ -43,7 +43,7 @@ export const Category$inboundSchema: z.ZodType<Category> = z.object({
   coverImage: z.string().nullable(),
   routes: z.record(z.string(), Route$inboundSchema),
   productsCount: z.number(),
-  customFields: z.array(z.any()),
+  customFields: z.union([z.record(z.string(), z.unknown()), z.array(z.unknown())]),
   updatedAt: z.string(),
   createdAt: z.string(),
   _links: HalLinks$inboundSchema.optional(),

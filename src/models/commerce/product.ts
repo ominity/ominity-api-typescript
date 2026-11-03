@@ -54,7 +54,7 @@ export type Product = {
   boxContent: string | null;
   type: string;
   condition: string;
-  categoryId: number;
+  categoryId: number | null;
   stock: number | null;
   isBackorderAllowed: boolean;
   routes: Record<string, ProductRoute>;
@@ -63,7 +63,7 @@ export type Product = {
   measurements?: ProductMeasurements;
   reviews?: ProductReviews;
   searches: Array<string>;
-  customFields: Array<any>;
+  customFields: Record<string, unknown> | Array<unknown>;
   publishedAt: string | null;
   updatedAt: string;
   createdAt: string;
@@ -126,7 +126,7 @@ export const Product$inboundSchema: z.ZodType<Product> = z.object({
   boxContent: z.nullable(z.string()),
   type: z.string(),
   condition: z.string(),
-  categoryId: z.number(),
+  categoryId: z.number().nullable(),
   stock: z.number().nullable(),
   isBackorderAllowed: z.boolean(),
   routes: z.record(z.string(), ProductRoute$inboundSchema),
@@ -134,7 +134,7 @@ export const Product$inboundSchema: z.ZodType<Product> = z.object({
   measurements: ProductMeasurements$inboundSchema.optional(),
   reviews: ProductReviews$inboundSchema.optional(),
   searches: z.array(z.string()),
-  customFields: z.array(z.any()),
+  customFields: z.union([z.record(z.string(), z.unknown()), z.array(z.unknown())]),
   publishedAt: z.nullable(z.string()),
   updatedAt: z.string(),
   createdAt: z.string(),

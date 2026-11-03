@@ -527,6 +527,21 @@ test("Product keeps the offers requested with include=offers", () => {
   assert.equal(parsed.offers?.[0]?.links?.self?.href, "https://example.test/api/v1/commerce/products/4/offers/9");
 });
 
+test("Product accepts no category and custom field values by key", () => {
+  const product = {
+    resource: "product", id: 88, sku: "BUSINESS", ean: "", mpn: "", asin: "", title: "Business", shortTitle: "",
+    coverImage: "", additionalImages: [], shortDescription: "", description: "", bulletpoints: [], boxContent: "",
+    type: "virtual", condition: "new", categoryId: null, stock: null, isBackorderAllowed: true, routes: {}, searches: [],
+    customFields: { requests: "3000000", domains: "20" }, publishedAt: null, updatedAt: "2026-11-03T00:00:00Z", createdAt: "2026-11-03T00:00:00Z",
+  };
+
+  const parsed = Product$inboundSchema.parse(product);
+  assert.equal(parsed.categoryId, null);
+  assert.deepEqual(parsed.customFields, { requests: "3000000", domains: "20" });
+  // PHP sends an empty map as [].
+  assert.deepEqual(Product$inboundSchema.parse({ ...product, customFields: [] }).customFields, []);
+});
+
 test("CartItem is typed and keeps the embedded product", () => {
   const item = CartItem$inboundSchema.parse(cartItemPayload({
     _embedded: { product: {
