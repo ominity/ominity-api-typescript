@@ -106,6 +106,15 @@ export type DisableMfaRequest = {
      * MFA Method.
      */
     method: string;
+    /**
+     * A current code of this method: the proof a user access token needs to turn off a method that is on. For email
+     * and SMS, send one first.
+     */
+    code?: string | undefined;
+    /**
+     * An unused recovery code, instead of `code`. It is used up.
+     */
+    recoveryCode?: string | undefined;
 };
 
 export type DisableMfaResponse = {
@@ -119,6 +128,8 @@ export const DisableMfaRequest$outboundSchema: z.ZodType<
 > = z.object({
     id: z.number(),
     method: z.string(),
+    code: z.string().optional(),
+    recoveryCode: z.string().optional(),
 });
 
 /** @internal */

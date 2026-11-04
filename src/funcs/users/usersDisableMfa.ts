@@ -4,6 +4,7 @@
 
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import {
+    encodeJSON,
     encodePath,
 } from "../../lib/encodings.js";
 import * as M from "../../lib/matchers.js";
@@ -80,7 +81,14 @@ async function $do(
         return [parsed, { status: "invalid" }];
     }
     const payload = parsed.value;
-    const body = null;
+    // The proof travels in the body; without it the request has none, as before.
+    const proof = {
+        ...(payload.code !== undefined ? { code: payload.code } : {}),
+        ...(payload.recoveryCode !== undefined ? { recoveryCode: payload.recoveryCode } : {}),
+    };
+    const body = Object.keys(proof).length > 0
+        ? encodeJSON("body", proof, { explode: true })
+        : null;
 
     const path = encodePath(
         "/users/{id}/mfa-methods/{method}",
@@ -89,6 +97,7 @@ async function $do(
     ) || "";
 
     const headers = new Headers({
+        ...(body !== null ? { "Content-Type": "application/json" } : {}),
         Accept: "application/json",
     });
 

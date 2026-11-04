@@ -37,6 +37,10 @@ export type ErrorResponseData = {
    * Optional validation errors keyed by field name.
    */
   fields?: Record<string, string[]> | undefined;
+  /**
+   * Seconds to wait before trying again, on a 429 (the `Retry-After` header says the same).
+   */
+  retryAfter?: number | undefined;
   links: ErrorResponseLinks;
 };
 
@@ -49,6 +53,7 @@ export class ErrorResponse extends OminityError {
   detail: string;
   code?: string | undefined;
   fields?: Record<string, string[]> | undefined;
+  retryAfter?: number | undefined;
   links: ErrorResponseLinks;
 
   /** The original data that was passed to this error instance. */
@@ -68,6 +73,7 @@ export class ErrorResponse extends OminityError {
     this.detail = err.detail;
     if (err.code != null) this.code = err.code;
     if (err.fields != null) this.fields = err.fields;
+    if (err.retryAfter != null) this.retryAfter = err.retryAfter;
     this.links = err.links;
 
     this.name = "ErrorResponse";
@@ -87,6 +93,7 @@ export const ErrorResponse$inboundSchema: z.ZodType<
   code: z.optional(z.string()),
   fields: z.optional(ErrorResponseFieldsSchema),
   errors: z.optional(ErrorResponseFieldsSchema),
+  retryAfter: z.optional(types.number()),
   _links: z.lazy(() => ErrorResponseLinks$inboundSchema),
   request$: z.custom<Request>(x => x instanceof Request),
   response$: z.custom<Response>(x => x instanceof Response),
@@ -112,6 +119,7 @@ export type ErrorResponse$Outbound = {
   detail: string;
   code?: string | undefined;
   fields?: Record<string, string[]> | undefined;
+  retryAfter?: number | undefined;
   _links: ErrorResponseLinks$Outbound;
 };
 
@@ -128,6 +136,7 @@ export const ErrorResponse$outboundSchema: z.ZodType<
       detail: data.detail,
       code: data.code,
       fields: data.fields,
+      retryAfter: data.retryAfter,
       _links: data.links,
     };
   });

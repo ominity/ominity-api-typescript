@@ -558,3 +558,68 @@ test("CartItem is typed and keeps the embedded product", () => {
   assert.equal(item.links?.cart?.href, "https://example.test/api/v1/commerce/carts/cart-1");
   assert.equal("_embedded" in item, false);
 });
+
+test("turning off an MFA method sends the proof in the body, and nothing without one", async () => {
+  const requests = [];
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async (request) => {
+        requests.push(request.clone());
+        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "content-type": "application/json" } });
+      },
+    }),
+  });
+
+  await sdk.users.mfaMethods.disable({ id: 7, method: "authenticator", code: "123456" }, noRetries);
+  await sdk.users.mfaMethods.disable({ id: 7, method: "authenticator", recoveryCode: "K7Q2M9XA" }, noRetries);
+  await sdk.users.mfaMethods.disable({ id: 7, method: "authenticator" }, noRetries);
+
+  assert.equal(requests[0].method, "DELETE");
+  assert.equal(new URL(requests[0].url).pathname, "/api/v1/users/7/mfa-methods/authenticator");
+  assert.equal(requests[0].headers.get("content-type"), "application/json");
+  assert.deepEqual(JSON.parse(await requests[0].text()), { code: "123456" });
+  assert.deepEqual(JSON.parse(await requests[1].text()), { recoveryCode: "K7Q2M9XA" });
+  assert.equal(await requests[2].text(), "");
+});
+
+test("new recovery codes send the proof with the confirmation", async () => {
+  let forwarded;
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async (request) => {
+        forwarded = request.clone();
+        return new Response(JSON.stringify({ _embedded: { user_recovery_codes: [] }, count: 0 }), {
+          status: 200,
+          headers: { "content-type": "application/hal+json" },
+        });
+      },
+    }),
+  });
+
+  await sdk.users.recoveryCodes.regenerate({ id: 7, confirm: true, method: "email", code: "654321" }, noRetries);
+
+  assert.equal(new URL(forwarded.url).pathname, "/api/v1/users/7/recovery-codes");
+  assert.deepEqual(JSON.parse(await forwarded.text()), { confirm: true, method: "email", code: "654321" });
+});
+
+test("a 429 says how long to wait", async () => {
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async () => new Response(JSON.stringify({
+        status: 429,
+        title: "Too Many Requests",
+        detail: "Too many wrong codes. Try again later.",
+        retryAfter: 540,
+        _links: { documentation: { href: "https://docs.ominity.com/overview/handling-errors", type: "text/html" } },
+      }), { status: 429, headers: { "content-type": "application/json", "retry-after": "540" } }),
+    }),
+  });
+
+  await assert.rejects(
+    sdk.users.mfaMethods.validate({ id: 7, method: "authenticator", code: "000000" }, noRetries),
+    (error) => error instanceof ErrorResponse && error.status === 429 && error.retryAfter === 540,
+  );
+});

@@ -65,6 +65,19 @@ export type RegenerateRecoveryCodesRequest = {
      * Confirmation flag.
      */
     confirm: boolean;
+    /**
+     * The enabled MFA method `code` comes from. With a user access token and MFA on, new codes need proof: `method`
+     * and `code`, or `recoveryCode`.
+     */
+    method?: string | undefined;
+    /**
+     * A current code of `method`.
+     */
+    code?: string | undefined;
+    /**
+     * An unused recovery code, instead of `method` and `code`.
+     */
+    recoveryCode?: string | undefined;
 };
 
 export type RegenerateRecoveryCodesResponse = Paginated<UserRecoveryCode>;
@@ -75,6 +88,9 @@ export const RegenerateRecoveryCodesRequest$outboundSchema: z.ZodType<
 > = z.object({
     id: z.number(),
     confirm: z.boolean(),
+    method: z.string().optional(),
+    code: z.string().optional(),
+    recoveryCode: z.string().optional(),
 });
 
 /** @internal */

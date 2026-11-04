@@ -81,7 +81,12 @@ async function $do(
         return [parsed, { status: "invalid" }];
     }
     const payload = parsed.value;
-    const body = encodeJSON("body", { confirm: payload.confirm }, { explode: true });
+    const body = encodeJSON("body", {
+        confirm: payload.confirm,
+        ...(payload.method !== undefined ? { method: payload.method } : {}),
+        ...(payload.code !== undefined ? { code: payload.code } : {}),
+        ...(payload.recoveryCode !== undefined ? { recoveryCode: payload.recoveryCode } : {}),
+    }, { explode: true });
 
     const path = encodePath(
         "/users/{id}/recovery-codes",
