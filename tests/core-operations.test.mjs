@@ -299,6 +299,7 @@ test("subscription plan changes and cancellation follow the quote/confirm flow",
     json(200, subscriptionChange({
       status: "awaiting_payment",
       orderId: 55,
+      payment: "mandate",
       _links: { checkout: { href: "https://example.test/api/v1/commerce/customers/1/orders/55", type: "application/hal+json" } },
     })),
     new Response(null, { status: 204 }),
@@ -326,10 +327,13 @@ test("subscription plan changes and cancellation follow the quote/confirm flow",
   assert.equal(quote.links?.subscription?.href, "https://example.test/api/v1/commerce/customers/1/subscriptions/2");
   assert.deepEqual(JSON.parse(seen[1].body), { toOfferId: 12, timing: "immediate" });
 
-  const confirmed = await subscriptions.confirmChange({ customerId: 1, subscriptionId: 2, data: { quoteId: quote.id } });
+  assert.equal(quote.payment, undefined);
+
+  const confirmed = await subscriptions.confirmChange({ customerId: 1, subscriptionId: 2, data: { quoteId: quote.id, promotionCodes: ["WELCOME10"] } });
   assert.equal(confirmed.orderId, 55);
+  assert.equal(confirmed.payment, "mandate");
   assert.equal(confirmed.links?.checkout?.href, "https://example.test/api/v1/commerce/customers/1/orders/55");
-  assert.deepEqual(JSON.parse(seen[2].body), { quoteId: quote.id });
+  assert.deepEqual(JSON.parse(seen[2].body), { quoteId: quote.id, promotionCodes: ["WELCOME10"] });
 
   await subscriptions.cancelChange({ customerId: 1, subscriptionId: 2, changeId: quote.id });
   assert.equal(seen[3].path, `/api/v1/commerce/customers/1/subscriptions/2/changes/${quote.id}`);

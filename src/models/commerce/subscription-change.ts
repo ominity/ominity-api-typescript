@@ -19,6 +19,12 @@ export type SubscriptionChangeStatus =
 
 export type SubscriptionChangeTiming = "immediate" | "period_end" | (string & {});
 
+/**
+ * How the order of an immediate upgrade is paid: `mandate` when it is charged on the customer's mandate right away
+ * (the plan changes once that payment succeeds), `checkout` when the customer pays it.
+ */
+export type SubscriptionChangePayment = "mandate" | "checkout" | (string & {});
+
 /** The plan on one side of a change. */
 export type SubscriptionChangePlan = {
   productId: number | null;
@@ -60,6 +66,8 @@ export type SubscriptionChange = {
   quoteExpiresAt: string | null;
   /** The order to pay for an immediate upgrade; also linked as `links.checkout`. */
   orderId: number | null;
+  /** How that order is paid; `null` without an order (absent from servers before it was added). */
+  payment?: SubscriptionChangePayment | null | undefined;
   createdAt: string | null;
   links?: HalLinks;
 };
@@ -119,6 +127,7 @@ export const SubscriptionChange$inboundSchema: z.ZodType<SubscriptionChange> = z
   warnings: z.array(z.string()),
   quoteExpiresAt: z.string().nullable(),
   orderId: z.number().int().nullable(),
+  payment: z.string().nullable().optional(),
   createdAt: z.string().nullable(),
   _links: HalLinks$inboundSchema.optional(),
 }).loose().transform((value) => remap$(value, { _links: "links" }) as SubscriptionChange);
