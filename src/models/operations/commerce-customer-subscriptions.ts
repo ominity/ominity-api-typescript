@@ -69,6 +69,17 @@ export type ConfirmCustomerSubscriptionChangeResponse = SubscriptionChange;
 export const ConfirmCustomerSubscriptionChangeRequest$outboundSchema: z.ZodType<ConfirmCustomerSubscriptionChangeRequest> = z.object({ customerId: z.number().int(), subscriptionId: z.number().int(), data: z.object({ quoteId: z.string(), promotionCodes: z.array(z.string()).optional() }) });
 export const ConfirmCustomerSubscriptionChangeResponse$inboundSchema = SubscriptionChange$inboundSchema;
 
+/**
+ * Sets the promotion codes of a quoted immediate upgrade: they are checked and priced on the order the upgrade gets,
+ * and the quote shows the discount (`quote.discount`, `quote.due`); confirming applies them. An empty list removes them.
+ * A code that is not valid or does not apply is refused (`order.promotion_code_invalid` /
+ * `order.promotion_code_not_applicable`, under `promotionCodes`).
+ */
+export type UpdateCustomerSubscriptionChangeRequest = { customerId: number; subscriptionId: number; changeId: string; data: { promotionCodes: string[] } };
+export type UpdateCustomerSubscriptionChangeResponse = SubscriptionChange;
+export const UpdateCustomerSubscriptionChangeRequest$outboundSchema: z.ZodType<UpdateCustomerSubscriptionChangeRequest> = z.object({ customerId: z.number().int(), subscriptionId: z.number().int(), changeId: z.string(), data: z.object({ promotionCodes: z.array(z.string()) }) });
+export const UpdateCustomerSubscriptionChangeResponse$inboundSchema = SubscriptionChange$inboundSchema;
+
 export type CancelCustomerSubscriptionChangeRequest = { customerId: number; subscriptionId: number; changeId: string };
 export type CancelCustomerSubscriptionChangeResponse = void;
 export const CancelCustomerSubscriptionChangeRequest$outboundSchema: z.ZodType<CancelCustomerSubscriptionChangeRequest> = z.object({ customerId: z.number().int(), subscriptionId: z.number().int(), changeId: z.string() });

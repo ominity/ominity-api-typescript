@@ -1,4 +1,4 @@
-import { customerSubscriptionsCancel, customerSubscriptionsCancelChange, customerSubscriptionsConfirmChange, customerSubscriptionsCreate, customerSubscriptionsDelete, customerSubscriptionsGet, customerSubscriptionsGetTransitionProduct, customerSubscriptionsList, customerSubscriptionsListTransitionProducts, customerSubscriptionsListTransitions, customerSubscriptionsQuoteChange, customerSubscriptionsRenew, customerSubscriptionsRevokeCancellation, customerSubscriptionsUpdate } from "../../funcs/commerce/index.js";
+import { customerSubscriptionsCancel, customerSubscriptionsCancelChange, customerSubscriptionsConfirmChange, customerSubscriptionsCreate, customerSubscriptionsDelete, customerSubscriptionsGet, customerSubscriptionsGetTransitionProduct, customerSubscriptionsList, customerSubscriptionsListTransitionProducts, customerSubscriptionsListTransitions, customerSubscriptionsQuoteChange, customerSubscriptionsRenew, customerSubscriptionsRevokeCancellation, customerSubscriptionsUpdate, customerSubscriptionsUpdateChange } from "../../funcs/commerce/index.js";
 import { ClientSDK, RequestOptions } from "../../lib/sdks.js";
 import * as operations from "../../models/operations/index.js";
 import { unwrapAsync } from "../../types/fp.js";
@@ -17,6 +17,8 @@ export class CustomerSubscriptions extends ClientSDK {
   /** Confirms a quoted change. An immediate upgrade that needs payment returns the order to pay as `orderId` / `links.checkout`. */
   async confirmChange(request: operations.ConfirmCustomerSubscriptionChangeRequest, options?: RequestOptions): Promise<operations.ConfirmCustomerSubscriptionChangeResponse> { return unwrapAsync(customerSubscriptionsConfirmChange(this, request, options)); }
   /** Withdraws a scheduled change, or an immediate upgrade that was not paid yet. */
+  /** Sets the promotion codes of a quoted upgrade; the quote shows their discount (`quote.discount`, `quote.due`). */
+  async updateChange(request: operations.UpdateCustomerSubscriptionChangeRequest, options?: RequestOptions): Promise<operations.UpdateCustomerSubscriptionChangeResponse> { return unwrapAsync(customerSubscriptionsUpdateChange(this, request, options)); }
   async cancelChange(request: operations.CancelCustomerSubscriptionChangeRequest, options?: RequestOptions): Promise<void> { return unwrapAsync(customerSubscriptionsCancelChange(this, request, options)); }
   /** Without `quoteId` quotes the cancellation; with the quote's `id` confirms it. It can be revoked until it takes effect. */
   async cancel(request: operations.CancelCustomerSubscriptionRequest, options?: RequestOptions): Promise<operations.CancelCustomerSubscriptionResponse> { return unwrapAsync(customerSubscriptionsCancel(this, request, options)); }

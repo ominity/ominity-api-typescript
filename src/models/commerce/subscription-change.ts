@@ -45,6 +45,10 @@ export type SubscriptionChangeQuoteLine = {
 export type SubscriptionChangeQuote = {
   lines: SubscriptionChangeQuoteLine[];
   charge: CurrencyAmount;
+  /** The promotion codes' discount on the charge (`updateChange`); absent from servers before it was added. */
+  discount?: CurrencyAmount | undefined;
+  /** What is due after that discount; absent from servers before it was added. */
+  due?: CurrencyAmount | undefined;
   credit: CurrencyAmount;
   settlement: string | null;
 };
@@ -62,6 +66,8 @@ export type SubscriptionChange = {
   from: SubscriptionChangePlan;
   to: SubscriptionChangePlan;
   quote: SubscriptionChangeQuote;
+  /** The promotion codes set on the quote of an upgrade (`updateChange`); absent from servers before it was added. */
+  promotionCodes?: string[] | undefined;
   warnings: string[];
   quoteExpiresAt: string | null;
   /** The order to pay for an immediate upgrade; also linked as `links.checkout`. */
@@ -107,6 +113,8 @@ export const SubscriptionChangeQuoteLine$inboundSchema: z.ZodType<SubscriptionCh
 export const SubscriptionChangeQuote$inboundSchema: z.ZodType<SubscriptionChangeQuote> = z.object({
   lines: z.array(SubscriptionChangeQuoteLine$inboundSchema),
   charge: CurrencyAmount$inboundSchema,
+  discount: CurrencyAmount$inboundSchema.optional(),
+  due: CurrencyAmount$inboundSchema.optional(),
   credit: CurrencyAmount$inboundSchema,
   settlement: z.string().nullable(),
 });
@@ -124,6 +132,7 @@ export const SubscriptionChange$inboundSchema: z.ZodType<SubscriptionChange> = z
   from: SubscriptionChangePlan$inboundSchema,
   to: SubscriptionChangePlan$inboundSchema,
   quote: SubscriptionChangeQuote$inboundSchema,
+  promotionCodes: z.array(z.string()).optional(),
   warnings: z.array(z.string()),
   quoteExpiresAt: z.string().nullable(),
   orderId: z.number().int().nullable(),

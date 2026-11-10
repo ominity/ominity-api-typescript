@@ -46,6 +46,7 @@ const operationCases = [
   ["customerSubscriptionsListTransitions", { customerId: 1, subscriptionId: 2 }, "GET", "/commerce/customers/1/subscriptions/2/transitions"],
   ["customerSubscriptionsQuoteChange", { customerId: 1, subscriptionId: 2, data: { toOfferId: 12 } }, "POST", "/commerce/customers/1/subscriptions/2/changes/quote"],
   ["customerSubscriptionsConfirmChange", { customerId: 1, subscriptionId: 2, data: { quoteId: "change-id" } }, "POST", "/commerce/customers/1/subscriptions/2/changes"],
+  ["customerSubscriptionsUpdateChange", { customerId: 1, subscriptionId: 2, changeId: "change-id", data: { promotionCodes: ["WELCOME10"] } }, "PATCH", "/commerce/customers/1/subscriptions/2/changes/change-id"],
   ["customerSubscriptionsCancelChange", { customerId: 1, subscriptionId: 2, changeId: "change-id" }, "DELETE", "/commerce/customers/1/subscriptions/2/changes/change-id"],
   ["customerSubscriptionsCancel", { customerId: 1, subscriptionId: 2 }, "POST", "/commerce/customers/1/subscriptions/2/cancellation"],
   ["customerSubscriptionsRevokeCancellation", { customerId: 1, subscriptionId: 2 }, "DELETE", "/commerce/customers/1/subscriptions/2/cancellation"],
@@ -106,7 +107,7 @@ test("all added core operations construct the registered API method and path", a
   }
 
   assert.equal(seen.length, operationCases.length);
-  assert.equal(operationCases.length, 75);
+  assert.equal(operationCases.length, 76);
 });
 
 test("new operations encode deep filters, parse pagination, JSON bodies, and bytes", async () => {
@@ -348,6 +349,26 @@ test("subscription plan changes and cancellation follow the quote/confirm flow",
 
   await subscriptions.revokeCancellation({ customerId: 1, subscriptionId: 2 });
   assert.deepEqual(seen.map((request) => request.method), ["GET", "POST", "POST", "DELETE", "POST", "POST", "DELETE"]);
+});
+
+test("promotion codes on a quoted upgrade are sent and their discount is parsed", async () => {
+  const seen = [];
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({ fetcher: async (request) => {
+      seen.push({ path: new URL(request.url).pathname, method: request.method, body: await request.clone().text() });
+      return new Response(JSON.stringify(subscriptionChange({
+        promotionCodes: ["WELCOME10"],
+        quote: { ...subscriptionChange().quote, discount: { value: "0.65", currency: "EUR" }, due: { value: "5.80", currency: "EUR" } },
+      })), { status: 200, headers: { "content-type": "application/json" } });
+    } }),
+  });
+
+  const change = await sdk.commerce.customerSubscriptions.updateChange({ customerId: 1, subscriptionId: 2, changeId: "change-id", data: { promotionCodes: ["WELCOME10"] } });
+  assert.deepEqual(seen[0], { path: "/api/v1/commerce/customers/1/subscriptions/2/changes/change-id", method: "PATCH", body: '{"promotionCodes":["WELCOME10"]}' });
+  assert.deepEqual(change.promotionCodes, ["WELCOME10"]);
+  assert.equal(change.quote.discount?.value, "0.65");
+  assert.equal(change.quote.due?.value, "5.80");
 });
 
 test("a refused subscription change exposes the reason code and field messages", async () => {
