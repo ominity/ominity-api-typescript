@@ -33,6 +33,17 @@ export type UserCreateInput = {
   avatar?: string | null | undefined;
   language?: string | null | undefined;
   password?: string | undefined;
+  /**
+   * Verify the email with an emailed sign-up code before the account can sign in with its password (default `true`).
+   * Pass `false` for accounts created on someone's behalf.
+   */
+  verifyEmail?: boolean | undefined;
+  /** Where the code email's button links to (with `#email=…&code=…`); one of the channel's domains. */
+  redirectUrl?: string | null | undefined;
+  /** The visitor's IP address, for rate limiting. */
+  ipAddress?: string | null | undefined;
+  /** The visitor's user agent. */
+  userAgent?: string | null | undefined;
 };
 
 export type UserUpdateInput = {
@@ -87,6 +98,10 @@ export const CreateUserRequest$outboundSchema: z.ZodType<CreateUserRequest> = z
     avatar: z.string().nullable().optional(),
     language: z.string().nullable().optional(),
     password: z.string().optional(),
+    verifyEmail: z.boolean().optional(),
+    redirectUrl: z.string().nullable().optional(),
+    ipAddress: z.string().nullable().optional(),
+    userAgent: z.string().nullable().optional(),
   })
   .loose()
   .transform((v) => v as CreateUserRequest);
