@@ -27,6 +27,12 @@ export type IssueOAuth2TokenRequest = {
   code?: string | undefined;
   redirect_uri?: string | undefined;
   code_verifier?: string | undefined;
+  /** `grant_type=email_code`: the email the code was sent to (with `code`). */
+  email?: string | undefined;
+  /** `grant_type=passkey`: the `challengeId` of the sign-in challenge. */
+  challenge_id?: string | undefined;
+  /** `grant_type=passkey`: the browser's `PublicKeyCredential.toJSON()`, as a JSON string. */
+  credential?: string | undefined;
 };
 
 export type IssueOAuth2TokenResponse = OAuth2IssuedToken;
@@ -45,6 +51,9 @@ export const IssueOAuth2TokenRequest$outboundSchema: z.ZodType<
   code: z.string().optional(),
   redirect_uri: z.string().optional(),
   code_verifier: z.string().optional(),
+  email: z.string().optional(),
+  challenge_id: z.string().optional(),
+  credential: z.string().optional(),
 }).loose();
 
 /** @internal */

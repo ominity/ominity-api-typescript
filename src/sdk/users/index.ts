@@ -12,10 +12,13 @@ import { usersList } from "../../funcs/users/usersList.js";
 import { usersUpdate } from "../../funcs/users/usersUpdate.js";
 import { usersSendPasswordResetLink } from "../../funcs/users/usersSendPasswordResetLink.js";
 import { usersResetPassword } from "../../funcs/users/usersResetPassword.js";
+import { usersSendEmailCode } from "../../funcs/users/usersSendEmailCode.js";
+import { usersCreatePasskeySignInChallenge } from "../../funcs/users/userPasskeys.js";
 import { UserCustomers } from "./customers.js";
 import { UserLogins } from "./logins.js";
 import { UserMfaMethods } from "./mfa-methods.js";
 import { UserOAuthAccounts } from "./oauth-accounts.js";
+import { UserPasskeys } from "./passkeys.js";
 import { UserRecoveryCodes } from "./recovery-codes.js";
 
 export class Users extends ClientSDK {
@@ -24,6 +27,7 @@ export class Users extends ClientSDK {
   private _oauthAccounts?: UserOAuthAccounts;
   private _mfaMethods?: UserMfaMethods;
   private _recoveryCodes?: UserRecoveryCodes;
+  private _passkeys?: UserPasskeys;
 
   get logins(): UserLogins {
     return (this._logins ??= new UserLogins(this._options));
@@ -43,6 +47,10 @@ export class Users extends ClientSDK {
 
   get recoveryCodes(): UserRecoveryCodes {
     return (this._recoveryCodes ??= new UserRecoveryCodes(this._options));
+  }
+
+  get passkeys(): UserPasskeys {
+    return (this._passkeys ??= new UserPasskeys(this._options));
   }
 
   async list(
@@ -122,11 +130,42 @@ export class Users extends ClientSDK {
     ));
   }
 
+  /**
+   * Emails a 6-digit code: a sign-in code when the email has an account, a signup code otherwise (the answer is the
+   * same either way). Exchange it with `oauth2.token` and `grant_type=email_code`; a signup code creates the user.
+   */
+  async sendEmailCode(
+    request: operations.SendEmailCodeRequest,
+    options?: RequestOptions,
+  ): Promise<operations.SendEmailCodeResponse> {
+    return unwrapAsync(usersSendEmailCode(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Starts a passkey sign-in: options for `navigator.credentials.get()`. With `email`, answers `hasPasskeys` first (no
+   * challenge when false). Exchange the browser's answer with `oauth2.token` and `grant_type: "passkey"`.
+   */
+  async createPasskeySignInChallenge(
+    request: operations.CreatePasskeySignInChallengeRequest,
+    options?: RequestOptions,
+  ): Promise<operations.CreatePasskeySignInChallengeResponse> {
+    return unwrapAsync(usersCreatePasskeySignInChallenge(
+      this,
+      request,
+      options,
+    ));
+  }
+
   protected override _propagateLanguage(language: string | undefined): void {
     this._logins?.setLanguage(language);
     this._customers?.setLanguage(language);
     this._oauthAccounts?.setLanguage(language);
     this._mfaMethods?.setLanguage(language);
     this._recoveryCodes?.setLanguage(language);
+    this._passkeys?.setLanguage(language);
   }
 }

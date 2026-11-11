@@ -82,6 +82,14 @@ const operationCases = [
   ["mediaLibrarySearch", { q: "image" }, "GET", "/media-library/search"],
   ["mediaLibrarySource", { path: "image.jpg" }, "GET", "/media-library/items/source"],
   ["mediaLibraryDownload", { data: { items: [{ path: "image.jpg", type: "file" }] } }, "POST", "/media-library/downloads"],
+  ["usersSendEmailCode", { email: "person@example.test" }, "POST", "/users/email-codes"],
+  ["usersCreatePasskeySignInChallenge", { origin: "https://app.example.test" }, "POST", "/users/passkeys/challenge"],
+  ["userPasskeysList", { userId: 7 }, "GET", "/users/7/passkeys"],
+  ["userPasskeysGet", { userId: 7, id: 3 }, "GET", "/users/7/passkeys/3"],
+  ["userPasskeysCreateChallenge", { userId: 7, origin: "https://app.example.test" }, "POST", "/users/7/passkeys/challenge"],
+  ["userPasskeysCreate", { userId: 7, challengeId: "c", credential: { id: "x" } }, "POST", "/users/7/passkeys"],
+  ["userPasskeysUpdate", { userId: 7, id: 3, name: "Laptop" }, "PATCH", "/users/7/passkeys/3"],
+  ["userPasskeysDelete", { userId: 7, id: 3 }, "DELETE", "/users/7/passkeys/3"],
   ["translationsBulk", { data: { source_language: "en", target_languages: ["nl"], fields: [{ key: "title", source: "Hello" }] } }, "POST", "/translations/bulk"],
 ];
 
@@ -107,7 +115,7 @@ test("all added core operations construct the registered API method and path", a
   }
 
   assert.equal(seen.length, operationCases.length);
-  assert.equal(operationCases.length, 76);
+  assert.equal(operationCases.length, 84);
 });
 
 test("new operations encode deep filters, parse pagination, JSON bodies, and bytes", async () => {
@@ -647,4 +655,170 @@ test("a 429 says how long to wait", async () => {
     sdk.users.mfaMethods.validate({ id: 7, method: "authenticator", code: "000000" }, noRetries),
     (error) => error instanceof ErrorResponse && error.status === 429 && error.retryAfter === 540,
   );
+});
+
+test("an email code request sends the body and parses the 202 timing", async () => {
+  const seen = [];
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    security: { apiKey: "k".repeat(32) },
+    channelId: "3",
+    httpClient: new api.HTTPClient({
+      fetcher: async (request) => {
+        seen.push({ request, body: await request.clone().text() });
+        return new Response(JSON.stringify({
+          expiresAt: "2026-11-04T10:15:00+00:00",
+          resendAvailableAt: "2026-11-04T10:01:00+00:00",
+        }), { status: 202, headers: { "content-type": "application/json" } });
+      },
+    }),
+  });
+
+  assert.deepEqual(await sdk.users.sendEmailCode({
+    email: "person@example.test",
+    redirectUrl: "https://app.example.test/auth/verify",
+    language: "nl",
+    ipAddress: "203.0.113.7",
+    userAgent: "Test/1.0",
+  }), { expiresAt: "2026-11-04T10:15:00+00:00", resendAvailableAt: "2026-11-04T10:01:00+00:00" });
+
+  const [{ request, body }] = seen;
+  assert.equal(request.method, "POST");
+  assert.equal(new URL(request.url).pathname, "/api/v1/users/email-codes");
+  assert.equal(request.headers.get("authorization"), `Bearer ${"k".repeat(32)}`);
+  assert.equal(request.headers.get("x-channel-id"), "3");
+  assert.deepEqual(JSON.parse(body), {
+    email: "person@example.test",
+    redirectUrl: "https://app.example.test/auth/verify",
+    language: "nl",
+    ipAddress: "203.0.113.7",
+    userAgent: "Test/1.0",
+  });
+});
+
+test("a refused email code request keeps the status", async () => {
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async () => new Response(JSON.stringify({
+        status: 422,
+        title: "Unprocessable Content",
+        detail: "This URL is not on one of the channel's domains.",
+        _links: { documentation: { href: "https://docs.ominity.com/overview/handling-errors", type: "text/html" } },
+      }), { status: 422, headers: { "content-type": "application/json" } }),
+    }),
+  });
+
+  await assert.rejects(
+    sdk.users.sendEmailCode({ email: "person@example.test", redirectUrl: "https://evil.example/steal" }, noRetries),
+    (error) => error instanceof ErrorResponse && error.status === 422,
+  );
+});
+
+const passkey = {
+  resource: "user_passkey",
+  id: 3,
+  userId: 7,
+  name: "MacBook",
+  authenticator: "iCloud Keychain",
+  isSynced: true,
+  transports: ["internal", "hybrid"],
+  rpId: "app.example.test",
+  channelId: 1,
+  lastUsedAt: null,
+  lastUsedChannelId: null,
+  createdAt: "2026-11-11T10:00:00+00:00",
+  _links: { self: { href: "https://example.test/api/v1/users/7/passkeys/3", type: "application/hal+json" } },
+};
+
+function recordingSdk(responses) {
+  const seen = [];
+  const sdk = new api.Ominity({
+    serverURL: "https://example.test/api",
+    httpClient: new api.HTTPClient({
+      fetcher: async (request) => {
+        seen.push({ request, body: request.method === "GET" ? "" : await request.clone().text() });
+        const next = responses.shift();
+        assert.ok(next, "a mocked response is available");
+        return next.status === 204
+          ? new Response(null, { status: 204 })
+          : new Response(JSON.stringify(next.body), { status: next.status, headers: { "content-type": next.type ?? "application/json" } });
+      },
+    }),
+  });
+  return { sdk, seen };
+}
+
+test("an email-first passkey check answers hasPasskeys and the challenge", async () => {
+  const { sdk, seen } = recordingSdk([
+    { status: 200, body: { hasPasskeys: false } },
+    {
+      status: 200,
+      body: {
+        hasPasskeys: true,
+        challengeId: "9d7c2f0e",
+        expiresAt: "2026-11-11T10:05:00+00:00",
+        publicKey: { challenge: "abc", rpId: "app.example.test", allowCredentials: [{ type: "public-key", id: "cred", transports: ["internal"] }], userVerification: "required", timeout: 300000 },
+      },
+    },
+  ]);
+
+  assert.deepEqual(await sdk.users.createPasskeySignInChallenge({ origin: "https://app.example.test", email: "nobody@example.test" }), { hasPasskeys: false });
+
+  const started = await sdk.users.createPasskeySignInChallenge({ origin: "https://app.example.test", email: "olivia@example.test", ipAddress: "203.0.113.7" });
+  assert.equal(started.hasPasskeys, true);
+  assert.equal(started.challengeId, "9d7c2f0e");
+  assert.equal(started.publicKey.rpId, "app.example.test");
+  assert.equal(started.publicKey.allowCredentials[0].id, "cred");
+  assert.deepEqual(JSON.parse(seen[1].body), { origin: "https://app.example.test", email: "olivia@example.test", ipAddress: "203.0.113.7" });
+});
+
+test("passkeys are added, listed, renamed and removed", async () => {
+  const { sdk, seen } = recordingSdk([
+    { status: 200, body: { challengeId: "reg", expiresAt: "2026-11-11T10:05:00+00:00", publicKey: { challenge: "abc", rp: { name: "Shop", id: "app.example.test" }, user: { id: "h", name: "olivia@example.test", displayName: "Olivia" } } } },
+    { status: 201, body: passkey, type: "application/hal+json" },
+    { status: 200, body: { _embedded: { user_passkeys: [passkey] }, count: 1 }, type: "application/hal+json" },
+    { status: 200, body: { ...passkey, name: "Work laptop" }, type: "application/hal+json" },
+    { status: 204 },
+  ]);
+
+  const challenge = await sdk.users.passkeys.createChallenge({ userId: 7, origin: "https://app.example.test" });
+  assert.equal(challenge.publicKey.rp.id, "app.example.test");
+  assert.deepEqual(JSON.parse(seen[0].body), { origin: "https://app.example.test" });
+
+  const created = await sdk.users.passkeys.create({ userId: 7, challengeId: challenge.challengeId, credential: { id: "cred", rawId: "cred", type: "public-key", response: {} }, name: "MacBook" });
+  assert.equal(created.name, "MacBook");
+  assert.equal(created.isSynced, true);
+  assert.equal(created.links.self.href, "https://example.test/api/v1/users/7/passkeys/3");
+  assert.deepEqual(JSON.parse(seen[1].body), { challengeId: "reg", credential: { id: "cred", rawId: "cred", type: "public-key", response: {} }, name: "MacBook" });
+
+  const list = await sdk.users.passkeys.list({ userId: 7 });
+  assert.equal(list.count, 1);
+  assert.equal(list.items[0].rpId, "app.example.test");
+
+  assert.equal((await sdk.users.passkeys.update({ userId: 7, id: 3, name: "Work laptop" })).name, "Work laptop");
+  assert.deepEqual(JSON.parse(seen[3].body), { name: "Work laptop" });
+
+  assert.equal(await sdk.users.passkeys.delete({ userId: 7, id: 3 }), undefined);
+  assert.equal(seen[4].request.method, "DELETE");
+});
+
+test("the passkey grant sends the challenge and the credential", async () => {
+  const { sdk, seen } = recordingSdk([
+    { status: 200, body: { token_type: "Bearer", expires_in: 3600, access_token: "access", refresh_token: "refresh" } },
+  ]);
+
+  const token = await sdk.oauth2.issueToken({
+    grant_type: "passkey",
+    client_id: "client",
+    client_secret: "secret",
+    challenge_id: "9d7c2f0e",
+    credential: JSON.stringify({ id: "cred" }),
+  });
+
+  assert.equal(token.access_token ?? token.accessToken, "access");
+  const body = JSON.parse(seen[0].body);
+  assert.equal(body.grant_type, "passkey");
+  assert.equal(body.challenge_id, "9d7c2f0e");
+  assert.deepEqual(JSON.parse(body.credential), { id: "cred" });
 });

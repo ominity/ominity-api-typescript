@@ -75,7 +75,7 @@ function applyApiVersion(url: URL, apiVersion: string | undefined): URL {
   return url;
 }
 
-export const SDK_VERSION = "1.10.0";
+export const SDK_VERSION = "1.11.0";
 
 export const SDK_METADATA = {
   language: "typescript",

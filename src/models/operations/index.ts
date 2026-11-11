@@ -30,6 +30,8 @@ export * from "./localization-locales.js";
 export * from "./me.js";
 export * from "./users.js";
 export * from "./users-password-reset.js";
+export * from "./users-email-codes.js";
+export * from "./users-passkeys.js";
 export * from "./users-logins.js";
 export * from "./admins.js";
 export * from "./users-customers.js";
